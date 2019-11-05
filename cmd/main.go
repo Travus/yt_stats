@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 	"yt_stats"
 )
 
@@ -25,6 +26,12 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	yt_stats.StartTime = time.Now()
+	yt_stats.CommentRoot = "https://www.googleapis.com/youtube/v3/comment"
+	yt_stats.CommentsRoot = "https://www.googleapis.com/youtube/v3/commentThreads"
+	yt_stats.ChannelsRoot = "https://www.googleapis.com/youtube/v3/channels"
+
 	// Set port to 8080 and start handlers.
 	port := "8080"
 	http.HandleFunc("/ytstats/v1/", defaultHandler)
