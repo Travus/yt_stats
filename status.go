@@ -19,7 +19,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 			youtubeStatus = StatusCodeResponse{StatusCode: http.StatusInternalServerError,
 				                               StatusMessage: "yt_stats API failed to query YouTube"}
 		} else {
-			youtubeStatus = ErrorParser(resp.Body)
+			youtubeStatus = ErrorParser(resp.Body, nil)
 		}
 		defer resp.Body.Close()
 		response := StatusResponse{Version: "v1", Uptime: time.Now().Sub(StartTime), YoutubeStatus: youtubeStatus}
