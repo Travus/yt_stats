@@ -1,7 +1,5 @@
 package yt_stats
 
-import "time"
-
 type YoutubeErrorRequest struct {
 	Error struct {
 		Code    int    `json:"code"`
@@ -19,6 +17,6 @@ type StatusCodeResponse struct {
 
 type StatusResponse struct {
 	Version       string             `json:"version"`
-	Uptime        time.Duration      `json:"uptime"`
+	Uptime        float64            `json:"uptime"`
 	YoutubeStatus StatusCodeResponse `json:"youtube_status"`
 }

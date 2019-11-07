@@ -14,6 +14,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 		key := ""
 		// ToDo: Get key
 		var youtubeStatus StatusCodeResponse
+		uptime := time.Since(StartTime).Round(time.Second).Seconds()
 		resp, err := http.Get(fmt.Sprintf("%s?part=id&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s", ChannelsRoot, key))
 		if err != nil {
 			youtubeStatus = StatusCodeResponse{StatusCode: http.StatusInternalServerError,
@@ -22,7 +23,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 			youtubeStatus = ErrorParser(resp.Body, nil)
 		}
 		defer resp.Body.Close()
-		response := StatusResponse{Version: "v1", Uptime: time.Now().Sub(StartTime), YoutubeStatus: youtubeStatus}
+		response := StatusResponse{Version: "v1", Uptime: uptime, YoutubeStatus: youtubeStatus}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
 			log.Println("Failed to respond to status endpoint.")
