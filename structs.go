@@ -12,20 +12,6 @@ type YoutubeErrorRequest struct {
 	} `json:"error"`
 }
 
-type Test struct {
-	Kind     string `json:"kind"`
-	Etag     string `json:"etag"`
-	PageInfo struct {
-		TotalResults   int `json:"totalResults"`
-		ResultsPerPage int `json:"resultsPerPage"`
-	} `json:"pageInfo"`
-	Items []struct {
-		Kind string `json:"kind"`
-		Etag string `json:"etag"`
-		Id   string `json:"id"`
-	} `json:"items"`
-}
-
 type StatusCodeResponse struct {
 	StatusCode    int    `json:"status_code"`
 	StatusMessage string `json:"status_message"`
