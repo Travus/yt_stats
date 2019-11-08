@@ -16,8 +16,9 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 		uptime := time.Since(StartTime).Round(time.Second).Seconds()
 		resp, err := http.Get(fmt.Sprintf("%s?part=id&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s", ChannelsRoot, key))
 		if err != nil {
-			youtubeStatus = StatusCodeOutbound{StatusCode: http.StatusInternalServerError,
-				                               StatusMessage: "yt_stats API failed to query YouTube"}
+			youtubeStatus = StatusCodeOutbound{
+				StatusCode:    http.StatusInternalServerError,
+				StatusMessage: "yt_stats API failed to query YouTube"}
 		} else {
 			youtubeStatus = ErrorParser(resp.Body, nil)
 		}

@@ -13,9 +13,8 @@ import (
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		_, err := fmt.Fprintf(w, "This API provides an easy interface to filter youtube comments by " +
-										 "author and comments.\nIt also provides an interface to get youtube " +
-										 "channel stats.")
+		_, err := fmt.Fprintf(w, "This API provides an easy interface to filter youtube comments by author "+
+			"and comments.\nIt also provides an interface to get youtube channel stats.")
 		if err != nil {
 			log.Printf("Something went wrong writing REST API info.")
 		}
@@ -38,7 +37,7 @@ func main() {
 	http.HandleFunc("/ytstats/v1/status/", yt_stats.StatusHandler)
 
 	// Serve REST API.
-	err := http.ListenAndServe(":" + port, nil)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

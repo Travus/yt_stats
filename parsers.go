@@ -13,8 +13,9 @@ func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 	var errorCode YoutubeErrorInbound
 	err := json.NewDecoder(tee).Decode(&errorCode)
 	if err != nil {
-		return StatusCodeOutbound{StatusCode: http.StatusInternalServerError,
-			                      StatusMessage: "yt_stats API failed to query YouTube"}
+		return StatusCodeOutbound{
+			StatusCode:    http.StatusInternalServerError,
+			StatusMessage: "yt_stats API failed to query YouTube"}
 	}
 	if errorCode.Error.Code != 0 {
 		if errorCode.Error.Errors[0].Reason == "" {
