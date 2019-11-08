@@ -13,17 +13,17 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		key := ""
 		// ToDo: Get key
-		var youtubeStatus StatusCodeResponse
+		var youtubeStatus StatusCodeOutbound
 		uptime := time.Since(StartTime).Round(time.Second).Seconds()
 		resp, err := http.Get(fmt.Sprintf("%s?part=id&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s", ChannelsRoot, key))
 		if err != nil {
-			youtubeStatus = StatusCodeResponse{StatusCode: http.StatusInternalServerError,
+			youtubeStatus = StatusCodeOutbound{StatusCode: http.StatusInternalServerError,
 				                               StatusMessage: "yt_stats API failed to query YouTube"}
 		} else {
 			youtubeStatus = ErrorParser(resp.Body, nil)
 		}
 		defer resp.Body.Close()
-		response := StatusResponse{Version: "v1", Uptime: uptime, YoutubeStatus: youtubeStatus}
+		response := StatusOutbound{Version: "v1", Uptime: uptime, YoutubeStatus: youtubeStatus}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
 			log.Println("Failed to respond to status endpoint.")

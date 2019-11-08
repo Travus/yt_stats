@@ -1,6 +1,6 @@
 package yt_stats
 
-type YoutubeErrorRequest struct {
+type YoutubeErrorInbound struct {
 	Error struct {
 		Code    int    `json:"code"`
 		Message string `json:"message"`
@@ -10,13 +10,13 @@ type YoutubeErrorRequest struct {
 	} `json:"error"`
 }
 
-type StatusCodeResponse struct {
+type StatusCodeOutbound struct {
 	StatusCode    int    `json:"status_code"`
 	StatusMessage string `json:"status_message"`
 }
 
-type StatusResponse struct {
+type StatusOutbound struct {
 	Version       string             `json:"version"`
 	Uptime        float64            `json:"uptime"`
-	YoutubeStatus StatusCodeResponse `json:"youtube_status"`
+	YoutubeStatus StatusCodeOutbound `json:"youtube_status"`
 }
