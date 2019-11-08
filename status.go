@@ -11,8 +11,7 @@ import (
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		key := ""
-		// ToDo: Get key
+		key := r.URL.Query().Get("token")
 		var youtubeStatus StatusCodeOutbound
 		uptime := time.Since(StartTime).Round(time.Second).Seconds()
 		resp, err := http.Get(fmt.Sprintf("%s?part=id&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s", ChannelsRoot, key))
