@@ -32,22 +32,26 @@ func StatusHandler(input Inputs) http.Handler {
 			if err != nil {
 				youtubeStatus = StatusCodeOutbound{
 					StatusCode:    http.StatusInternalServerError,
-					StatusMessage: "yt_stats API failed to query YouTube"}
+					StatusMessage: "failedToQueryYouTubeAPI"}
 			} else {
 				youtubeStatus = ErrorParser(resp.Body, nil)
 			}
 			if resp != nil {
 				defer resp.Body.Close()
 			}
-			response := StatusOutbound{Version: "v1", Uptime: uptime, YoutubeStatus: youtubeStatus}
+			response := StatusOutbound{
+				Version: "v1", Uptime: uptime,
+				YoutubeStatus: youtubeStatus,
+			}
 			w.WriteHeader(response.YoutubeStatus.StatusCode)
 			err = json.NewEncoder(w).Encode(response)
 			if err != nil {
 				log.Println("Failed to respond to status endpoint.")
 			}
-			break
+			return
 		default:
-			http.Error(w, "Request type not supported.", http.StatusNotImplemented)
+			unsupportedRequestType(w)
+			return
 		}
 	}
 	return http.HandlerFunc(stats)

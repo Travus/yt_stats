@@ -2,6 +2,7 @@ package yt_stats_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -55,7 +56,24 @@ func keyMissing(t *testing.T, f func(inputs yt_stats.Inputs) http.Handler, url s
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := `{"status_code":400,"status_message":"keyMissing"}`
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyMissing"}`, http.StatusBadRequest)
+	if strings.Trim(rr.Body.String(), "\n") != expected {
+		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
+	}
+}
+
+func unsupportedRequestType(t *testing.T, f func(inputs yt_stats.Inputs) http.Handler, url string, rType string) {
+	req, err := http.NewRequest(rType, url, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := f(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusNotImplemented {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusNotImplemented, status)
+	}
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"requestTypeNotSupported"}`, http.StatusNotImplemented)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}

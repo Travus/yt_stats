@@ -87,3 +87,7 @@ func TestChannelHandlerNoChannel(t *testing.T) {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
 }
+
+func TestChannelHandlerUnsupportedType(t *testing.T) {
+	unsupportedRequestType(t, yt_stats.ChannelHandler, "/ytstats/v1/channel/", "PUT")
+}

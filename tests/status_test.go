@@ -49,3 +49,7 @@ func TestStatusHandlerInvalidKey(t *testing.T) {
 func TestStatusHandlerNoKey(t *testing.T) {
 	keyMissing(t, yt_stats.StatusHandler, "/ytstats/v1/status/")
 }
+
+func TestStatusHandlerUnsupportedType(t *testing.T) {
+	unsupportedRequestType(t, yt_stats.StatusHandler, "/ytstats/v1/status/", "PUT")
+}
