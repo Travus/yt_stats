@@ -1,5 +1,14 @@
 package yt_stats
 
+import "time"
+
+type Inputs struct {
+	StartTime    time.Time
+	RepliesRoot  string
+	CommentsRoot string
+	ChannelsRoot string
+}
+
 type YoutubeErrorInbound struct {
 	Error struct {
 		Code    int    `json:"code"`
