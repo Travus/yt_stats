@@ -22,8 +22,8 @@ func TestChannelParser(t *testing.T) {
 	if reflect.DeepEqual(outbound, yt_stats.ChannelOutbound{}) {
 		t.Error("function returned empty struct")
 	}
-	if reflect.DeepEqual(outbound, expected) {
-		t.Errorf("function parsed struct incorrectly: expected %v actually %v", expected, outbound)
+	if !reflect.DeepEqual(outbound, expected) {
+		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
 	}
 }
 
@@ -45,8 +45,8 @@ func TestChannelHandlerSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed decoding response from endpoint")
 	}
-	if reflect.DeepEqual(response, expected) {
-		t.Errorf("handler returned wrong body: expected %v actually %v", expected, response)
+	if response.Channels[0].Id != ChannelId {
+		t.Error("handler returned wrong body, got back wrong channel id.")
 	}
 }
 

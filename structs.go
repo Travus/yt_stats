@@ -49,24 +49,27 @@ type ChannelInbound struct {
 			} `json:"relatedPlaylists"`
 		} `json:"contentDetails"`
 		Statistics struct {
-			ViewCount       string `json:"viewCount"`
-			SubscriberCount string `json:"subscriberCount"`
-			VideoCount      string `json:"videoCount"`
+			ViewCount             string `json:"viewCount"`
+			SubscriberCount       string `json:"subscriberCount"`
+			HiddenSubscriberCount bool   `json:"hiddenSubscriberCount"`
+			VideoCount            string `json:"videoCount"`
 		} `json:"statistics"`
 	} `json:"items"`
 }
 
+type Channel struct {
+	Id                    string `json:"id"`
+	Title                 string `json:"title"`
+	Description           string `json:"description"`
+	Thumbnail             string `json:"thumbnail"`
+	Country               string `json:"country"`
+	UploadsPlaylist       string `json:"uploads_playlist"`
+	ViewCount             int    `json:"view_count"`
+	HiddenSubscriberCount bool   `json:"hidden_subscriber_count"`
+	SubscriberCount       int    `json:"subscriber_count"`
+	VideoCount            int    `json:"video_count"`
+}
+
 type ChannelOutbound struct {
-	Channels []struct {
-		Id                    string `json:"id"`
-		Title                 string `json:"title"`
-		Description           string `json:"description"`
-		Thumbnail             string `json:"thumbnail"`
-		Country               string `json:"country"`
-		UploadsPlaylist       string `json:"uploads_playlist"`
-		ViewCount             int    `json:"view_count"`
-		HiddenSubscriberCount bool   `json:"hidden_subscriber_count"`
-		SubscriberCount       int    `json:"subscriber_count"`
-		VideoCount            int    `json:"video_count"`
-	} `json:"channels"`
+	Channels []Channel `json:"channels"`
 }
