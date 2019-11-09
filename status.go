@@ -13,17 +13,8 @@ func StatusHandler(input Inputs) http.Handler {
 		switch r.Method {
 		case http.MethodGet:
 			var youtubeStatus StatusCodeOutbound
-			key := r.URL.Query().Get("key")
+			key := getKey(w, r)
 			if key == "" {
-				youtubeStatus = StatusCodeOutbound{
-					StatusCode:    http.StatusBadRequest,
-					StatusMessage: "keyMissing",
-				}
-				w.WriteHeader(http.StatusBadRequest)
-				err := json.NewEncoder(w).Encode(youtubeStatus)
-				if err != nil {
-					log.Println("Failed to respond to status endpoint.")
-				}
 				return
 			}
 			uptime := time.Since(input.StartTime).Round(time.Second).Seconds()
