@@ -37,6 +37,7 @@ func main() {
 	port := "8080"
 	http.HandleFunc("/ytstats/v1/", defaultHandler)
 	http.Handle("/ytstats/v1/status/", yt_stats.StatusHandler(inputs))
+	http.Handle("/ytstats/v1/channel/", yt_stats.ChannelHandler(inputs))
 
 	// Serve REST API.
 	err := http.ListenAndServe(":"+port, nil)

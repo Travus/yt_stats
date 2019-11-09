@@ -29,3 +29,44 @@ type StatusOutbound struct {
 	Uptime        float64            `json:"uptime"`
 	YoutubeStatus StatusCodeOutbound `json:"youtube_status"`
 }
+
+type ChannelInbound struct {
+	Items []struct {
+		Id      string `json:"id"`
+		Snippet struct {
+			Title       string `json:"title"`
+			Description string `json:"description"`
+			Thumbnails  struct {
+				Medium struct {
+					Url string `json:"url"`
+				} `json:"medium"`
+			} `json:"thumbnails"`
+			Country string `json:"country"`
+		} `json:"snippet"`
+		ContentDetails struct {
+			RelatedPlaylists struct {
+				Uploads string `json:"uploads"`
+			} `json:"relatedPlaylists"`
+		} `json:"contentDetails"`
+		Statistics struct {
+			ViewCount       string `json:"viewCount"`
+			SubscriberCount string `json:"subscriberCount"`
+			VideoCount      string `json:"videoCount"`
+		} `json:"statistics"`
+	} `json:"items"`
+}
+
+type ChannelOutbound struct {
+	Channels []struct {
+		Id                    string `json:"id"`
+		Title                 string `json:"title"`
+		Description           string `json:"description"`
+		Thumbnail             string `json:"thumbnail"`
+		Country               string `json:"country"`
+		UploadsPlaylist       string `json:"uploads_playlist"`
+		ViewCount             int    `json:"view_count"`
+		HiddenSubscriberCount bool   `json:"hidden_subscriber_count"`
+		SubscriberCount       int    `json:"subscriber_count"`
+		VideoCount            int    `json:"video_count"`
+	} `json:"channels"`
+}

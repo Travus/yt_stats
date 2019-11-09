@@ -40,6 +40,7 @@ func StatusHandler(input Inputs) http.Handler {
 				defer resp.Body.Close()
 			}
 			response := StatusOutbound{Version: "v1", Uptime: uptime, YoutubeStatus: youtubeStatus}
+			w.WriteHeader(response.YoutubeStatus.StatusCode)
 			err = json.NewEncoder(w).Encode(response)
 			if err != nil {
 				log.Println("Failed to respond to status endpoint.")
