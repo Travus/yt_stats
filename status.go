@@ -9,7 +9,7 @@ import (
 )
 
 func StatusHandler(input Inputs) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	stats := func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			var youtubeStatus StatusCodeOutbound
@@ -48,5 +48,6 @@ func StatusHandler(input Inputs) http.Handler {
 		default:
 			http.Error(w, "Request type not supported.", http.StatusNotImplemented)
 		}
-	})
+	}
+	return http.HandlerFunc(stats)
 }
