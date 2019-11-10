@@ -8,8 +8,8 @@ import (
 
 func unsupportedRequestType(w http.ResponseWriter) {
 	response := StatusCodeOutbound{
-		StatusCode:    http.StatusNotImplemented,
-		StatusMessage: "requestTypeNotSupported",
+		StatusCode:    http.StatusMethodNotAllowed,
+		StatusMessage: "methodNotSupported",
 	}
 	w.WriteHeader(response.StatusCode)
 	err := json.NewEncoder(w).Encode(response)

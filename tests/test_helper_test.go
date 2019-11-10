@@ -70,10 +70,10 @@ func unsupportedRequestType(t *testing.T, f func(inputs yt_stats.Inputs) http.Ha
 	rr := httptest.NewRecorder()
 	handler := f(getInputs())
 	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusNotImplemented {
-		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusNotImplemented, status)
+	if status := rr.Code; status != http.StatusMethodNotAllowed {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusMethodNotAllowed, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"requestTypeNotSupported"}`, http.StatusNotImplemented)
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"methodNotSupported"}`, http.StatusMethodNotAllowed)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
