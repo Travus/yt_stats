@@ -25,9 +25,7 @@ func StatusHandler(input Inputs) http.Handler {
 				return
 			}
 			youtubeStatus = ErrorParser(resp.Body, nil)
-			if resp != nil {
-				defer resp.Body.Close()
-			}
+			defer resp.Body.Close()
 			response := StatusOutbound{
 				Version:       "v1",
 				Uptime:        uptime,
