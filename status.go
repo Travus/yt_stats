@@ -23,7 +23,8 @@ func StatusHandler(input Inputs) http.Handler {
 			if err != nil {
 				youtubeStatus = StatusCodeOutbound{
 					StatusCode:    http.StatusInternalServerError,
-					StatusMessage: "failedToQueryYouTubeAPI"}
+					StatusMessage: "failedToQueryYouTubeAPI",
+				}
 			} else {
 				youtubeStatus = ErrorParser(resp.Body, nil)
 			}
@@ -31,7 +32,8 @@ func StatusHandler(input Inputs) http.Handler {
 				defer resp.Body.Close()
 			}
 			response := StatusOutbound{
-				Version: "v1", Uptime: uptime,
+				Version:       "v1",
+				Uptime:        uptime,
 				YoutubeStatus: youtubeStatus,
 			}
 			w.WriteHeader(response.YoutubeStatus.StatusCode)
