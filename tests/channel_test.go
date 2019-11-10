@@ -58,10 +58,10 @@ func TestChannelHandlerInvalidKey(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler := yt_stats.ChannelHandler(getInputs())
 	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusOK, status)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := `{"version":"v1","uptime":1,"youtube_status":{"status_code":400,"status_message":"keyInvalid"}}`
+	expected := `{"status_code":400,"status_message":"keyInvalid"}`
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
