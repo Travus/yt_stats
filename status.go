@@ -21,13 +21,10 @@ func StatusHandler(input Inputs) http.Handler {
 			resp, err := http.Get(fmt.Sprintf("%s?part=id&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s",
 				input.ChannelsRoot, key))
 			if err != nil {
-				youtubeStatus = StatusCodeOutbound{
-					StatusCode:    http.StatusInternalServerError,
-					StatusMessage: "failedToQueryYouTubeAPI",
-				}
-			} else {
-				youtubeStatus = ErrorParser(resp.Body, nil)
+				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
+				return
 			}
+			youtubeStatus = ErrorParser(resp.Body, nil)
 			if resp != nil {
 				defer resp.Body.Close()
 			}
