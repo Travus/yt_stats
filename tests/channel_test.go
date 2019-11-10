@@ -61,7 +61,7 @@ func TestChannelHandlerInvalidKey(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := `{"status_code":400,"status_message":"keyInvalid"}`
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -82,7 +82,25 @@ func TestChannelHandlerNoChannel(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := `{"status_code":400,"status_message":"channelIdMissing"}`
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"channelIdMissing"}`, http.StatusBadRequest)
+	if strings.Trim(rr.Body.String(), "\n") != expected {
+		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
+	}
+}
+
+func TestChannelHandlerTooManyChannels(t *testing.T) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=%s&id=%s",
+		strings.Repeat(",", 50), getKey(t)), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := yt_stats.ChannelHandler(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
+	}
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"tooManyItems"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
