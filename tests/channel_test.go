@@ -90,7 +90,7 @@ func TestChannelHandlerNoChannel(t *testing.T) {
 
 func TestChannelHandlerTooManyChannels(t *testing.T) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=%s&id=%s",
-		strings.Repeat(",", 50), getKey(t)), nil)
+		getKey(t), strings.Repeat(",", 50)), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
