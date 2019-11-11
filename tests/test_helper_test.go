@@ -28,8 +28,11 @@ func parseFile(t *testing.T, f string, s interface{}) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer read.Close()
 	err = json.NewDecoder(read).Decode(&s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = read.Close()
 	if err != nil {
 		t.Fatal(err)
 	}

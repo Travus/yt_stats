@@ -34,7 +34,7 @@ func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 		}
 	}
 	if s != nil {
-		err := json.NewDecoder(&buf).Decode(&s)
+		err = json.NewDecoder(&buf).Decode(&s)
 		if err != nil {
 			return StatusCodeOutbound{
 				StatusCode:    http.StatusInternalServerError,
