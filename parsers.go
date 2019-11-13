@@ -80,3 +80,19 @@ func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 	}
 	return outbound
 }
+
+func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
+	return PlaylistOutbound{}
+}
+
+func PlaylistItemsParser(inbound []PlaylistItemsInbound) []string {
+	return []string{}
+}
+
+func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) {
+	return
+}
+
+func FullPlaylistParser(inbound PlaylistInbound, stats bool, videos bool) PlaylistOutbound {
+	return PlaylistOutbound{}
+}
