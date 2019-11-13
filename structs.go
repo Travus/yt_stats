@@ -93,9 +93,9 @@ type PlaylistInbound struct {
 			Title       string `json:"title"`
 			Description string `json:"description"`
 			Thumbnails  struct {
-				Standard struct {
+				Medium struct {
 					Url string `json:"url"`
-				} `json:"standard"`
+				} `json:"medium"`
 			} `json:"thumbnails"`
 			ChannelTitle string `json:"channelTitle"`
 		} `json:"snippet"`
@@ -126,9 +126,9 @@ type VideoInbound struct {
 			Title       string `json:"title"`
 			Description string `json:"description"`
 			Thumbnails  struct {
-				Standard struct {
+				Medium struct {
 					Url string `json:"url"`
-				} `json:"standard"`
+				} `json:"medium"`
 			} `json:"thumbnails"`
 		} `json:"snippet"`
 		ContentDetails struct {
@@ -145,8 +145,9 @@ type VideoInbound struct {
 
 // Represents the JSON for stats over a range of videos. Part of Playlist struct.
 type VideoStats struct {
-	TotalVideos           int    `json:"total_videos"`
 	AvailableVideos       int    `json:"available_videos"`
+	TotalLength           int    `json:"total_length"`
+	TotalViews            int    `json:"total_views"`
 	LongestVideo          string `json:"longest_video"`
 	LongestVideoDuration  int    `json:"longest_video_duration"`
 	ShortestVideo         string `json:"shortest_video"`
@@ -181,6 +182,7 @@ type Video struct {
 	Description  string `json:"description"`
 	PublishedAt  string `json:"published_at"`
 	Thumbnail    string `json:"thumbnail"`
+	ChannelId    string `json:"channel_id"`
 	Duration     int    `json:"duration"`
 	ViewCount    int    `json:"view_count"`
 	LikeCount    int    `json:"like_count"`
@@ -195,10 +197,9 @@ type Playlist struct {
 	Description string     `json:"description"`
 	PublishedAt string     `json:"published_at"`
 	Thumbnail   string     `json:"thumbnail"`
-	TotalLength int        `json:"total_length"`
-	TotalViews  int        `json:"total_views"`
-	VideoStats  VideoStats `json:"video_stats"`
-	Videos      []Video    `json:"videos"`
+	TotalVideos int        `json:"total_videos"`
+	VideoStats  VideoStats `json:"video_stats,omitempty"`
+	Videos      []Video    `json:"videos,omitempty"`
 	ChannelInfo struct {
 		ChannelId    string `json:"channel_id"`
 		ChannelTitle string `json:"channel_title"`
