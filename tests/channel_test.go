@@ -31,7 +31,8 @@ func TestChannelHandlerSuccess(t *testing.T) {
 	var response yt_stats.ChannelOutbound
 	var expected yt_stats.ChannelOutbound
 	parseFile(t, "res/channel_outbound.json", &expected)
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=%s&id=%s", getKey(t), ChannelId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=%s&id=%s",
+		getKey(t), ChannelId), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +52,8 @@ func TestChannelHandlerSuccess(t *testing.T) {
 }
 
 func TestChannelHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=invalid&id=%s", ChannelId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=invalid&id=%s",
+		ChannelId), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
