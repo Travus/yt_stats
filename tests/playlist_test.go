@@ -1,7 +1,6 @@
 package yt_stats_test
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"yt_stats"
@@ -26,9 +25,9 @@ func TestPlaylistTopLevelParser(t *testing.T) {
 	var inbound yt_stats.PlaylistInbound
 	var expected yt_stats.PlaylistOutbound
 	parseFile(t, "res/playlist_inbound.json", &inbound)
-	parseFile(t, "res/top_level_playlist_outbound.json", expected)
+	parseFile(t, "res/top_level_playlist_outbound.json", &expected)
 	outbound := yt_stats.PlaylistTopLevelParser(inbound)
-	if reflect.DeepEqual(outbound, yt_stats.Playlist{}) {
+	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
 		t.Error("function returned empty struct")
 	}
 	if !reflect.DeepEqual(outbound, expected) {
@@ -74,17 +73,44 @@ func TestFullPlaylistParsing(t *testing.T) {
 	var expected yt_stats.PlaylistOutbound
 	parseFile(t, "res/playlist_outbound.json", &expected)
 	expected.Playlists[0].Videos = []yt_stats.Video{}
+	expected.Playlists[1].Videos = []yt_stats.Video{}
+	expected.Playlists[0].VideoStats = yt_stats.VideoStats{}
 	expected.Playlists[1].VideoStats = yt_stats.VideoStats{}
-	fmt.Printf("%+v", expected)
 	outbound := parseMockedPlaylist(t, false, false)
-	println("YO!")
 	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
 		t.Error("function returned empty data structure")
 	}
 	if !reflect.DeepEqual(outbound, expected) {
 		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
 	}
-
+	parseFile(t, "res/playlist_outbound.json", &expected)
+	expected.Playlists[0].Videos = []yt_stats.Video{}
+	expected.Playlists[1].Videos = []yt_stats.Video{}
+	outbound = parseMockedPlaylist(t, true, false)
+	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
+		t.Error("function returned empty data structure")
+	}
+	if !reflect.DeepEqual(outbound, expected) {
+		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
+	}
+	parseFile(t, "res/playlist_outbound.json", &expected)
+	expected.Playlists[0].VideoStats = yt_stats.VideoStats{}
+	expected.Playlists[1].VideoStats = yt_stats.VideoStats{}
+	outbound = parseMockedPlaylist(t, false, true)
+	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
+		t.Error("function returned empty data structure")
+	}
+	if !reflect.DeepEqual(outbound, expected) {
+		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
+	}
+	parseFile(t, "res/playlist_outbound.json", &expected)
+	outbound = parseMockedPlaylist(t, true, true)
+	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
+		t.Error("function returned empty data structure")
+	}
+	if !reflect.DeepEqual(outbound, expected) {
+		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
+	}
 }
 
 func TestPlaylistHandlerSuccess(t *testing.T) {
