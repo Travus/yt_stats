@@ -98,7 +98,13 @@ func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 }
 
 func PlaylistItemsParser(inbound []PlaylistItemsInbound) []string {
-	return []string{}
+	var outbound []string
+	for _, inboundPlItems := range inbound {
+		for _, item := range inboundPlItems.Items {
+			outbound = append(outbound, item.Snippet.ResourceId.VideoId)
+		}
+	}
+	return outbound
 }
 
 func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) {
