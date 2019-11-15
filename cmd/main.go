@@ -27,10 +27,13 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	inputs := yt_stats.Inputs{
-		StartTime:    time.Now(),
-		RepliesRoot:  "https://www.googleapis.com/youtube/v3/comments",
-		CommentsRoot: "https://www.googleapis.com/youtube/v3/commentThreads",
-		ChannelsRoot: "https://www.googleapis.com/youtube/v3/channels",
+		StartTime:             time.Now(),
+		RepliesRoot:           "https://www.googleapis.com/youtube/v3/comments",
+		CommentsRoot:          "https://www.googleapis.com/youtube/v3/commentThreads",
+		ChannelsRoot:          "https://www.googleapis.com/youtube/v3/channels",
+		PlaylistsRoot:         "https://www.googleapis.com/youtube/v3/playlists",
+		PlaylistItemsRootRoot: "https://www.googleapis.com/youtube/v3/playlistItems",
+		VideosRoot:            "https://www.googleapis.com/youtube/v3/videos",
 	}
 
 	// Set port to 8080 and start handlers.
@@ -38,6 +41,7 @@ func main() {
 	http.HandleFunc("/ytstats/v1/", defaultHandler)
 	http.Handle("/ytstats/v1/status/", yt_stats.StatusHandler(inputs))
 	http.Handle("/ytstats/v1/channel/", yt_stats.ChannelHandler(inputs))
+	http.Handle("/ytstats/v1/playlist/", yt_stats.PlaylistHandler(inputs))
 
 	// Serve REST API.
 	err := http.ListenAndServe(":"+port, nil)

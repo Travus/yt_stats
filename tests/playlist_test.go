@@ -1,10 +1,17 @@
 package yt_stats_test
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 	"yt_stats"
 )
+
+const PlaylistIds = "PLbpi6ZahtOH7EUqtnmgJ3RFsej5UeFgxU%2CPLpjK416fmKwR-wFOaITVZ4Ktx2-mm2qp7"
 
 func parseMockedPlaylist(t *testing.T, stats bool, videos bool) yt_stats.PlaylistOutbound {
 	var inbound yt_stats.PlaylistInbound
@@ -114,29 +121,111 @@ func TestFullPlaylistParsing(t *testing.T) {
 }
 
 func TestPlaylistHandlerSuccess(t *testing.T) {
-
+	var response yt_stats.PlaylistOutbound
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s&id=%s&videos=%s&stats=%s",
+		getKey(t), PlaylistIds, "true", "false"), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := yt_stats.PlaylistHandler(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusOK, status)
+	}
+	err = json.NewDecoder(rr.Body).Decode(&response)
+	if err != nil {
+		t.Fatal("failed decoding response from endpoint")
+	}
+	if len(response.Playlists) != 2 {
+		t.Error("handler returned wrong body, got back wrong amount of playlists")
+	}
+	if response.Playlists[0].VideoStats.AvailableVideos != 0 {
+		t.Error("handler returned wrong body, got back stats despite not asking for them")
+	}
+	if len(response.Playlists[0].Videos) == 0 {
+		t.Error("handler returned wrong body, got back no videos despite asking for them")
+	}
+	if response.Playlists[0].Id + "%2C" + response.Playlists[1].Id == PlaylistIds {
+		t.Error("handler returned wrong body, got back wrong playlist ids")
+	}
 }
 
 func TestPlaylistHandlerInvalidKey(t *testing.T) {
-
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=invalid&id=%s",
+		PlaylistIds), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := yt_stats.PlaylistHandler(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
+	}
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
+	if strings.Trim(rr.Body.String(), "\n") != expected {
+		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
+	}
 }
 
 func TestPlaylistHandlerNoKey(t *testing.T) {
-
+	keyMissing(t, yt_stats.PlaylistHandler, fmt.Sprintf("/ytstats/v1/channel/?id=%s", PlaylistIds))
 }
 
 func TestPlaylistHandlerInvalidFlag(t *testing.T) {
-
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s&id=%s&videos=invalid",
+		getKey(t), PlaylistIds), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := yt_stats.PlaylistHandler(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
+	}
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"flagInvalid"}`, http.StatusBadRequest)
+	if strings.Trim(rr.Body.String(), "\n") != expected {
+		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
+	}
 }
 
 func TestPlaylistHandlerNoPlaylist(t *testing.T) {
-
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s", getKey(t)), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := yt_stats.PlaylistHandler(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
+	}
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"channelIdMissing"}`, http.StatusBadRequest)
+	if strings.Trim(rr.Body.String(), "\n") != expected {
+		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
+	}
 }
 
 func TestPlaylistHandlerTooManyPlaylists(t *testing.T) {
-
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s&id=%s",
+		getKey(t), strings.Repeat(",", 50)), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := yt_stats.PlaylistHandler(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
+	}
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"tooManyItems"}`, http.StatusBadRequest)
+	if strings.Trim(rr.Body.String(), "\n") != expected {
+		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
+	}
 }
 
 func TestPlaylistHandlerUnsupportedType(t *testing.T) {
-
+	unsupportedRequestType(t, yt_stats.PlaylistHandler, "/ytstats/v1/playlist/", "PUT")
 }

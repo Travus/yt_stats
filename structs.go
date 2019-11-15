@@ -6,10 +6,13 @@ import (
 
 // Stores variables sent to the handlers, basically global variables.
 type Inputs struct {
-	StartTime    time.Time
-	RepliesRoot  string
-	CommentsRoot string
-	ChannelsRoot string
+	StartTime             time.Time
+	RepliesRoot           string
+	CommentsRoot          string
+	ChannelsRoot          string
+	PlaylistsRoot         string
+	PlaylistItemsRootRoot string
+	VideosRoot            string
 }
 
 // Represents the JSON received from a YouTube error response.

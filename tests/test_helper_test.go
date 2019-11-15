@@ -41,10 +41,13 @@ func parseFile(t *testing.T, f string, s interface{}) {
 // Gives inputs used by handlers.
 func getInputs() yt_stats.Inputs {
 	return yt_stats.Inputs{
-		StartTime:    time.Now(),
-		RepliesRoot:  "https://www.googleapis.com/youtube/v3/comments",
-		CommentsRoot: "https://www.googleapis.com/youtube/v3/commentThreads",
-		ChannelsRoot: "https://www.googleapis.com/youtube/v3/channels",
+		StartTime:             time.Now(),
+		RepliesRoot:           "https://www.googleapis.com/youtube/v3/comments",
+		CommentsRoot:          "https://www.googleapis.com/youtube/v3/commentThreads",
+		ChannelsRoot:          "https://www.googleapis.com/youtube/v3/channels",
+		PlaylistsRoot:         "https://www.googleapis.com/youtube/v3/playlists",
+		PlaylistItemsRootRoot: "https://www.googleapis.com/youtube/v3/playlistItems",
+		VideosRoot:            "https://www.googleapis.com/youtube/v3/videos",
 	}
 }
 
