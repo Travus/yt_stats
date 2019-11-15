@@ -82,7 +82,19 @@ func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 }
 
 func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
-	return PlaylistOutbound{}
+	var outbound PlaylistOutbound
+	outbound.Playlists = make([]Playlist, len(inbound.Items))
+	for i, inboundPl := range inbound.Items {
+		outbound.Playlists[i].Id = inboundPl.Id
+		outbound.Playlists[i].Title = inboundPl.Snippet.Title
+		outbound.Playlists[i].Description = inboundPl.Snippet.Description
+		outbound.Playlists[i].PublishedAt = inboundPl.Snippet.PublishedAt
+		outbound.Playlists[i].Thumbnail = inboundPl.Snippet.Thumbnails.Medium.Url
+		outbound.Playlists[i].TotalVideos = inboundPl.ContentDetails.ItemCount
+		outbound.Playlists[i].ChannelInfo.ChannelId = inboundPl.Snippet.ChannelId
+		outbound.Playlists[i].ChannelInfo.ChannelTitle = inboundPl.Snippet.ChannelTitle
+	}
+	return outbound
 }
 
 func PlaylistItemsParser(inbound []PlaylistItemsInbound) []string {
