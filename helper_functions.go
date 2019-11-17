@@ -2,6 +2,7 @@ package yt_stats
 
 import (
 	"encoding/json"
+	duration "github.com/channelmeter/iso8601duration"
 	"log"
 	"net/http"
 )
@@ -28,4 +29,12 @@ func getKey(w http.ResponseWriter, r *http.Request) string {
 		sendStatusCode(w, http.StatusBadRequest, "keyMissing")
 	}
 	return key
+}
+
+func durationConverter(durStr string) (int, error) {
+	dur, err := duration.FromString(durStr)
+	if err != nil {
+		return 0, err
+	}
+	return int(dur.ToDuration().Seconds()), nil
 }

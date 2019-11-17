@@ -100,15 +100,114 @@ func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 func PlaylistItemsParser(inbound []PlaylistItemsInbound) []string {
 	var outbound []string
 	for _, inboundPlItems := range inbound {
-		for _, item := range inboundPlItems.Items {
-			outbound = append(outbound, item.Snippet.ResourceId.VideoId)
+		for _, plItem := range inboundPlItems.Items {
+			outbound = append(outbound, plItem.Snippet.ResourceId.VideoId)
 		}
 	}
 	return outbound
 }
 
-func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) {
-	return
+func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) error {
+	var vStats VideoStats
+	totalViews, totalLikes, totalDislikes, totalComments := 0, 0, 0, 0
+	for _, videoInbound := range inbound {
+		for _, video := range videoInbound.Items {
+			dur, err := durationConverter(video.ContentDetails.Duration)
+			if err != nil {
+				return err
+			}
+			views, err := strconv.Atoi(video.Statistics.ViewCount)
+			if err != nil {
+				return err
+			}
+			totalViews += views
+			likes, err := strconv.Atoi(video.Statistics.LikeCount)
+			if err != nil {
+				return err
+			}
+			totalLikes += likes
+			dislikes, err := strconv.Atoi(video.Statistics.DislikeCount)
+			if err != nil {
+				return err
+			}
+			totalDislikes += dislikes
+			comments, err := strconv.Atoi(video.Statistics.CommentCount)
+			if err != nil {
+				return err
+			}
+			totalComments += comments
+			if videos {
+				vid := Video{
+					Id:           video.Id,
+					Title:        video.Snippet.Title,
+					Description:  video.Snippet.Description,
+					PublishedAt:  video.Snippet.PublishedAt,
+					Thumbnail:    video.Snippet.Thumbnails.Medium.Url,
+					ChannelId:    video.Snippet.ChannelId,
+					Duration:     dur,
+					ViewCount:    views,
+					LikeCount:    likes,
+					DislikeCount: dislikes,
+					CommentCount: comments,
+				}
+				playlistObject.Videos = append(playlistObject.Videos, vid)
+			}
+			if stats {
+				vStats.AvailableVideos++
+				vStats.TotalLength += dur
+				vStats.TotalViews += views
+				if dur > vStats.LongestVideoDuration {
+					vStats.LongestVideo = video.Id
+					vStats.LongestVideoDuration = dur
+				}
+				if dur < vStats.ShortestVideoDuration {
+					vStats.ShortestVideo = video.Id
+					vStats.ShortestVideoDuration = dur
+				}
+				if views > vStats.MostViews {
+					vStats.MostViewedVideo = video.Id
+					vStats.MostViews = views
+				}
+				if views < vStats.LeastViews {
+					vStats.LeastViewedVideo = video.Id
+					vStats.LeastViews = views
+				}
+				if likes > vStats.MostLikes {
+					vStats.MostLikedVideo = video.Id
+					vStats.MostLikes = likes
+				}
+				if likes < vStats.LeastLikes {
+					vStats.LeastLikedVideo = video.Id
+					vStats.LeastLikes = likes
+				}
+				if dislikes > vStats.MostDislikes {
+					vStats.MostDislikedVideo = video.Id
+					vStats.MostDislikes = dislikes
+				}
+				if dislikes < vStats.LeastDislikes {
+					vStats.LeastDislikedVideo = video.Id
+					vStats.LeastDislikes = dislikes
+				}
+				if comments > vStats.MostComments {
+					vStats.MostCommentedVideo = video.Id
+					vStats.MostComments = comments
+				}
+				if comments < vStats.LeastComments {
+					vStats.LeastCommentedVideo = video.Id
+					vStats.LeastComments = comments
+				}
+			}
+		}
+	}
+	if stats {
+		vStats.AverageVideoDuration = vStats.TotalLength / vStats.AvailableVideos
+		vStats.AverageViews = vStats.TotalViews / vStats.AvailableVideos
+		vStats.AverageLikes = totalLikes / vStats.AvailableVideos
+		vStats.AverageDislikes = totalDislikes / vStats.AvailableVideos
+		vStats.AverageComments = totalComments / vStats.AvailableVideos
+		playlistObject.VideoStats = vStats
+	}
+	return nil
 }
 
 func FullPlaylistParser(inbound PlaylistInbound, stats bool, videos bool) PlaylistOutbound {

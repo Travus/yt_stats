@@ -126,6 +126,7 @@ type VideoInbound struct {
 		Id      string `json:"id"`
 		Snippet struct {
 			PublishedAt string `json:"publishedAt"`
+			ChannelId   string `json:"channelId"`
 			Title       string `json:"title"`
 			Description string `json:"description"`
 			Thumbnails  struct {
