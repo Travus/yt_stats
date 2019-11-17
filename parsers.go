@@ -156,43 +156,43 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 				vStats.AvailableVideos++
 				vStats.TotalLength += dur
 				vStats.TotalViews += views
-				if dur > vStats.LongestVideoDuration {
+				if dur > vStats.LongestVideoDuration || vStats.LongestVideo == "" {
 					vStats.LongestVideo = video.Id
 					vStats.LongestVideoDuration = dur
 				}
-				if dur < vStats.ShortestVideoDuration {
+				if dur < vStats.ShortestVideoDuration || vStats.ShortestVideo == "" {
 					vStats.ShortestVideo = video.Id
 					vStats.ShortestVideoDuration = dur
 				}
-				if views > vStats.MostViews {
+				if views > vStats.MostViews || vStats.MostViewedVideo == "" {
 					vStats.MostViewedVideo = video.Id
 					vStats.MostViews = views
 				}
-				if views < vStats.LeastViews {
+				if views < vStats.LeastViews || vStats.LeastViewedVideo == "" {
 					vStats.LeastViewedVideo = video.Id
 					vStats.LeastViews = views
 				}
-				if likes > vStats.MostLikes {
+				if likes > vStats.MostLikes || vStats.MostLikedVideo == "" {
 					vStats.MostLikedVideo = video.Id
 					vStats.MostLikes = likes
 				}
-				if likes < vStats.LeastLikes {
+				if likes < vStats.LeastLikes || vStats.LeastLikedVideo == "" {
 					vStats.LeastLikedVideo = video.Id
 					vStats.LeastLikes = likes
 				}
-				if dislikes > vStats.MostDislikes {
+				if dislikes > vStats.MostDislikes || vStats.MostDislikedVideo == "" {
 					vStats.MostDislikedVideo = video.Id
 					vStats.MostDislikes = dislikes
 				}
-				if dislikes < vStats.LeastDislikes {
+				if dislikes < vStats.LeastDislikes || vStats.LeastDislikedVideo == "" {
 					vStats.LeastDislikedVideo = video.Id
 					vStats.LeastDislikes = dislikes
 				}
-				if comments > vStats.MostComments {
+				if comments > vStats.MostComments || vStats.MostCommentedVideo == "" {
 					vStats.MostCommentedVideo = video.Id
 					vStats.MostComments = comments
 				}
-				if comments < vStats.LeastComments {
+				if comments < vStats.LeastComments || vStats.LeastCommentedVideo == "" {
 					vStats.LeastCommentedVideo = video.Id
 					vStats.LeastComments = comments
 				}

@@ -23,8 +23,14 @@ func parseMockedPlaylist(t *testing.T, stats bool, videos bool) yt_stats.Playlis
 	parseFile(t, "res/video_inbound_2-2.json", &plVideos2[1])
 	outbound := yt_stats.PlaylistTopLevelParser(inbound)
 	outbound.Playlists = make([]yt_stats.Playlist, 2)
-	yt_stats.VideoParser(plVideos1, &outbound.Playlists[0], stats, videos)
-	yt_stats.VideoParser(plVideos2, &outbound.Playlists[1], stats, videos)
+	err := yt_stats.VideoParser(plVideos1, &outbound.Playlists[0], stats, videos)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = yt_stats.VideoParser(plVideos2, &outbound.Playlists[1], stats, videos)
+	if err != nil {
+		t.Fatal(err)
+	}
 	return outbound
 }
 
@@ -62,15 +68,20 @@ func TestVideoParser(t *testing.T) {
 	videos2 := make([]yt_stats.VideoInbound, 2)
 	var inbound yt_stats.PlaylistInbound
 	var expected yt_stats.PlaylistOutbound
-	outbound := yt_stats.PlaylistTopLevelParser(inbound)
-	outbound.Playlists = make([]yt_stats.Playlist, 2)
-	parseFile(t, "res/playlist_inbound.json", &outbound)
+	parseFile(t, "res/playlist_inbound.json", &inbound)
 	parseFile(t, "res/video_inbound_1-1.json", &videos1[0])
 	parseFile(t, "res/video_inbound_2-1.json", &videos2[0])
 	parseFile(t, "res/video_inbound_2-2.json", &videos2[1])
 	parseFile(t, "res/playlist_outbound.json", &expected)
-	yt_stats.VideoParser(videos1, &outbound.Playlists[0], true, true)
-	yt_stats.VideoParser(videos2, &outbound.Playlists[1], true, true)
+	outbound := yt_stats.PlaylistTopLevelParser(inbound)
+	err := yt_stats.VideoParser(videos1, &outbound.Playlists[0], true, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = yt_stats.VideoParser(videos2, &outbound.Playlists[1], true, true)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(outbound, expected) {
 		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
 	}
