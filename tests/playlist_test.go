@@ -22,7 +22,7 @@ func parseMockedPlaylist(t *testing.T, stats bool, videos bool) yt_stats.Playlis
 	parseFile(t, "res/video_inbound_2-1.json", &plVideos2[0])
 	parseFile(t, "res/video_inbound_2-2.json", &plVideos2[1])
 	outbound := yt_stats.PlaylistTopLevelParser(inbound)
-	outbound.Playlists = make([]yt_stats.Playlist, 2)
+	// outbound.Playlists = make([]yt_stats.Playlist, 2)
 	err := yt_stats.VideoParser(plVideos1, &outbound.Playlists[0], stats, videos)
 	if err != nil {
 		t.Fatal(err)
@@ -90,8 +90,8 @@ func TestVideoParser(t *testing.T) {
 func TestFullPlaylistParsing(t *testing.T) {
 	var expected yt_stats.PlaylistOutbound
 	parseFile(t, "res/playlist_outbound.json", &expected)
-	expected.Playlists[0].Videos = []yt_stats.Video{}
-	expected.Playlists[1].Videos = []yt_stats.Video{}
+	expected.Playlists[0].Videos = nil
+	expected.Playlists[1].Videos = nil
 	expected.Playlists[0].VideoStats = yt_stats.VideoStats{}
 	expected.Playlists[1].VideoStats = yt_stats.VideoStats{}
 	outbound := parseMockedPlaylist(t, false, false)
@@ -102,8 +102,8 @@ func TestFullPlaylistParsing(t *testing.T) {
 		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
 	}
 	parseFile(t, "res/playlist_outbound.json", &expected)
-	expected.Playlists[0].Videos = []yt_stats.Video{}
-	expected.Playlists[1].Videos = []yt_stats.Video{}
+	expected.Playlists[0].Videos = nil
+	expected.Playlists[1].Videos = nil
 	outbound = parseMockedPlaylist(t, true, false)
 	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
 		t.Error("function returned empty data structure")
