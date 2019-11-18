@@ -15,7 +15,7 @@ func sendStatusCode(w http.ResponseWriter, code int, msg string) {
 	w.WriteHeader(code)
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		log.Println("Failed to respond to status endpoint.")
+		log.Println("Failed to send error response.")
 	}
 }
 
