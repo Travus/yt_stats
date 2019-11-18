@@ -24,8 +24,8 @@ func StatusHandler(input Inputs) http.Handler {
 				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return
 			}
-			youtubeStatus = ErrorParser(resp.Body, nil)
 			defer resp.Body.Close()
+			youtubeStatus = ErrorParser(resp.Body, nil)
 			response := StatusOutbound{
 				Version:       "v1",
 				Uptime:        uptime,

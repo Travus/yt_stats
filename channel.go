@@ -34,8 +34,8 @@ func ChannelHandler(input Inputs) http.Handler {
 				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return
 			}
-			youtubeStatus = ErrorParser(resp.Body, &channelInbound)
 			defer resp.Body.Close()
+			youtubeStatus = ErrorParser(resp.Body, &channelInbound)
 			if youtubeStatus.StatusCode != http.StatusOK {
 				sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return
