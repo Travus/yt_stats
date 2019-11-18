@@ -213,7 +213,7 @@ func TestPlaylistHandlerNoPlaylist(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"channelIdMissing"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"playlistIdMissing"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
