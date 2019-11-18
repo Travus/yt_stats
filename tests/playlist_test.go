@@ -92,8 +92,8 @@ func TestFullPlaylistParsing(t *testing.T) {
 	parseFile(t, "res/playlist_outbound.json", &expected)
 	expected.Playlists[0].Videos = nil
 	expected.Playlists[1].Videos = nil
-	expected.Playlists[0].VideoStats = yt_stats.VideoStats{}
-	expected.Playlists[1].VideoStats = yt_stats.VideoStats{}
+	expected.Playlists[0].VideoStats = nil
+	expected.Playlists[1].VideoStats = nil
 	outbound := parseMockedPlaylist(t, false, false)
 	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
 		t.Error("function returned empty data structure")
@@ -112,8 +112,8 @@ func TestFullPlaylistParsing(t *testing.T) {
 		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
 	}
 	parseFile(t, "res/playlist_outbound.json", &expected)
-	expected.Playlists[0].VideoStats = yt_stats.VideoStats{}
-	expected.Playlists[1].VideoStats = yt_stats.VideoStats{}
+	expected.Playlists[0].VideoStats = nil
+	expected.Playlists[1].VideoStats = nil
 	outbound = parseMockedPlaylist(t, false, true)
 	if reflect.DeepEqual(outbound, yt_stats.PlaylistOutbound{}) {
 		t.Error("function returned empty data structure")
@@ -151,7 +151,7 @@ func TestPlaylistHandlerSuccess(t *testing.T) {
 	if len(response.Playlists) != 2 {
 		t.Error("handler returned wrong body, got back wrong amount of playlists")
 	}
-	if response.Playlists[0].VideoStats.AvailableVideos != 0 {
+	if response.Playlists[0].VideoStats != nil {
 		t.Error("handler returned wrong body, got back stats despite not asking for them")
 	}
 	if len(response.Playlists[0].Videos) == 0 {

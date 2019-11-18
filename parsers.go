@@ -207,7 +207,9 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 		vStats.AverageLikes = totalLikes / vStats.AvailableVideos
 		vStats.AverageDislikes = totalDislikes / vStats.AvailableVideos
 		vStats.AverageComments = totalComments / vStats.AvailableVideos
-		playlistObject.VideoStats = vStats
+		playlistObject.VideoStats = &vStats
+	} else {
+		playlistObject.VideoStats = nil
 	}
 	return nil
 }

@@ -196,14 +196,14 @@ type Video struct {
 
 // Represents the JSON for one playlist. Part of PlaylistOutbound struct.
 type Playlist struct {
-	Id          string     `json:"id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	PublishedAt string     `json:"published_at"`
-	Thumbnail   string     `json:"thumbnail"`
-	TotalVideos int        `json:"total_videos"`
-	VideoStats  VideoStats `json:"video_stats,omitempty"`
-	Videos      []Video    `json:"videos,omitempty"`
+	Id          string      `json:"id"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	PublishedAt string      `json:"published_at"`
+	Thumbnail   string      `json:"thumbnail"`
+	TotalVideos int         `json:"total_videos"`
+	VideoStats  *VideoStats `json:"video_stats,omitempty"`
+	Videos      []Video     `json:"videos,omitempty"`
 	ChannelInfo struct {
 		ChannelId    string `json:"channel_id"`
 		ChannelTitle string `json:"channel_title"`
