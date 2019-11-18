@@ -42,6 +42,7 @@ func main() {
 	http.Handle("/ytstats/v1/status/", yt_stats.StatusHandler(inputs))
 	http.Handle("/ytstats/v1/channel/", yt_stats.ChannelHandler(inputs))
 	http.Handle("/ytstats/v1/playlist/", yt_stats.PlaylistHandler(inputs))
+	http.Handle("/ytstats/v1/video/", yt_stats.VideoHandler(inputs))
 
 	// Serve REST API.
 	err := http.ListenAndServe(":"+port, nil)

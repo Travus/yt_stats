@@ -214,3 +214,8 @@ type Playlist struct {
 type PlaylistOutbound struct {
 	Playlists []Playlist `json:"playlists"`
 }
+
+// Represents the JSON sent by the Video endpoint.
+type VideoOutbound struct {
+	Videos []Video `json:"videos"`
+}
