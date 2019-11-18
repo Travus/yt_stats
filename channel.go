@@ -15,8 +15,9 @@ func ChannelHandler(input Inputs) http.Handler {
 		case http.MethodGet:
 			var youtubeStatus StatusCodeOutbound
 			var channelInbound ChannelInbound
-			key := getKey(w, r)
+			key := r.URL.Query().Get("key")
 			if key == "" {
+				sendStatusCode(w, http.StatusBadRequest, "keyMissing")
 				return
 			}
 			ids := r.URL.Query().Get("id")

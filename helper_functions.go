@@ -23,14 +23,6 @@ func unsupportedRequestType(w http.ResponseWriter) {
 	sendStatusCode(w, http.StatusMethodNotAllowed, "methodNotSupported")
 }
 
-func getKey(w http.ResponseWriter, r *http.Request) string {
-	key := r.URL.Query().Get("key")
-	if key == "" {
-		sendStatusCode(w, http.StatusBadRequest, "keyMissing")
-	}
-	return key
-}
-
 func durationConverter(durStr string) (int, error) {
 	dur, err := duration.FromString(durStr)
 	if err != nil {

@@ -13,8 +13,9 @@ func StatusHandler(input Inputs) http.Handler {
 		switch r.Method {
 		case http.MethodGet:
 			var youtubeStatus StatusCodeOutbound
-			key := getKey(w, r)
+			key := r.URL.Query().Get("key")
 			if key == "" {
+				sendStatusCode(w, http.StatusBadRequest, "keyMissing")
 				return
 			}
 			uptime := time.Since(input.StartTime).Round(time.Second).Seconds()
