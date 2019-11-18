@@ -157,7 +157,7 @@ func TestPlaylistHandlerSuccess(t *testing.T) {
 	if len(response.Playlists[0].Videos) == 0 {
 		t.Error("handler returned wrong body, got back no videos despite asking for them")
 	}
-	if response.Playlists[0].Id + "%2C" + response.Playlists[1].Id == PlaylistIds {
+	if response.Playlists[0].Id + "%2C" + response.Playlists[1].Id != PlaylistIds {
 		t.Error("handler returned wrong body, got back wrong playlist ids")
 	}
 }
