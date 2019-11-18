@@ -43,7 +43,7 @@ func ChannelHandler(input Inputs) http.Handler {
 			channelOutbound := ChannelParser(channelInbound)
 			err = json.NewEncoder(w).Encode(channelOutbound)
 			if err != nil {
-				log.Println("Failed to respond to status endpoint.")
+				log.Println("Failed to respond to channel endpoint.")
 			}
 			return
 		default:
