@@ -15,8 +15,9 @@ func PlaylistHandler(input Inputs) http.Handler {
 		case http.MethodGet:
 			var youtubeStatus StatusCodeOutbound
 			var playlistInbound PlaylistInbound
-			key := getKey(w, r)
+			key := r.URL.Query().Get("key")
 			if key == "" {
+				sendStatusCode(w, http.StatusBadRequest, "keyMissing")
 				return
 			}
 			ids := r.URL.Query().Get("id")
@@ -44,19 +45,79 @@ func PlaylistHandler(input Inputs) http.Handler {
 				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return
 			}
-			youtubeStatus = ErrorParser(resp.Body, &playlistInbound)
 			defer resp.Body.Close()
+			youtubeStatus = ErrorParser(resp.Body, &playlistInbound)
 			if youtubeStatus.StatusCode != http.StatusOK {
 				sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return
 			}
-			playlistOutbound := PlaylistTopLevelParser(playlistInbound)
+			plOutbound := PlaylistTopLevelParser(playlistInbound)
 			if videosFlag == "false" && statsFlag == "false" {
-				err = json.NewEncoder(w).Encode(playlistOutbound)
+				err = json.NewEncoder(w).Encode(plOutbound)
 				if err != nil {
 					log.Println("Failed to respond to playlist endpoint.")
 				}
 				return
+			}
+			for i := range plOutbound.Playlists {
+				pageToken := ""
+				var playlistItemsInbound []PlaylistItemsInbound
+				for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
+					var playlistItemPageInbound PlaylistItemsInbound
+					ok := func() bool {  // Internal function for deferring the closing of response bodies inside loop.
+						resp, err = http.Get(fmt.Sprintf("%s?part=snippet&playlistId=%s&key=%s&maxResults=50&" +
+							"pageToken=%s", input.PlaylistItemsRootRoot, plOutbound.Playlists[i].Id, key, pageToken))
+						if err != nil {
+							sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
+							return false
+						}
+						defer resp.Body.Close()
+						youtubeStatus = ErrorParser(resp.Body, &playlistItemPageInbound)
+						if youtubeStatus.StatusCode != http.StatusOK {
+							sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
+							return false
+						}
+						pageToken = playlistItemPageInbound.NextPageToken
+						playlistItemsInbound = append(playlistItemsInbound, playlistItemPageInbound)
+						return true
+					}()
+					if !ok {
+						return
+					}
+				}
+				videoIds := PlaylistItemsParser(playlistItemsInbound)
+				var videoInbound []VideoInbound
+				for _, page := range videoIds {
+					var videoInboundPage VideoInbound
+					ok := func() bool {
+						videoPageIds := url.QueryEscape(strings.Join(page, ","))
+						resp, err = http.Get(fmt.Sprintf("%s?part=snippet,contentDetails,statistics&id=%s&key=%s&" +
+							"maxResults=50", input.VideosRoot, videoPageIds, key))
+						if err != nil {
+							sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
+							return false
+						}
+						defer resp.Body.Close()
+						youtubeStatus = ErrorParser(resp.Body, &videoInboundPage)
+						if youtubeStatus.StatusCode != http.StatusOK {
+							sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
+							return false
+						}
+						videoInbound = append(videoInbound, videoInboundPage)
+						return true
+					}()
+					if !ok {
+						return
+					}
+				}
+				err = VideoParser(videoInbound, &plOutbound.Playlists[i], statsFlag != "false", videosFlag != "false")
+				if err != nil {
+					sendStatusCode(w, http.StatusInternalServerError, "failedParsingYouTubeResponse")
+				}
+			}
+			err = json.NewEncoder(w).Encode(plOutbound)
+			if err != nil {
+				log.Println("Failed to respond to playlist endpoint.")
 			}
 			return
 		default:
