@@ -50,7 +50,7 @@ func TestPlaylistTopLevelParser(t *testing.T) {
 
 func TestPlaylistItemsParser(t *testing.T) {
 	inbound := make([]yt_stats.PlaylistItemsInbound, 2)
-	var expected []string
+	var expected [][]string
 	parseFile(t, "res/playlistitems_outbound.json", &expected)
 	parseFile(t, "res/playlistitems_inbound_2-1.json", &inbound[0])
 	parseFile(t, "res/playlistitems_inbound_2-2.json", &inbound[1])

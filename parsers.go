@@ -97,12 +97,14 @@ func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 	return outbound
 }
 
-func PlaylistItemsParser(inbound []PlaylistItemsInbound) []string {
-	var outbound []string
+func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
+	var outbound [][]string
 	for _, inboundPlItems := range inbound {
+		var page []string
 		for _, plItem := range inboundPlItems.Items {
-			outbound = append(outbound, plItem.Snippet.ResourceId.VideoId)
+			page = append(page, plItem.Snippet.ResourceId.VideoId)
 		}
+		outbound = append(outbound, page)
 	}
 	return outbound
 }
