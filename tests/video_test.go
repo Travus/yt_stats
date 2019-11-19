@@ -18,10 +18,9 @@ func getVideoIds(t *testing.T) string {
 }
 
 func TestVideoHandlerSuccess(t *testing.T) {
-	var expected yt_stats.VideoOutbound
 	var response yt_stats.VideoOutbound
-	parseFile(t, "res/video_outbound.json", &expected)
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?key=%s&id=%s", getKey(t), getVideoIds(t)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?key=%s&id=%s&stats=true",
+		getKey(t), getVideoIds(t)), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,8 +37,11 @@ func TestVideoHandlerSuccess(t *testing.T) {
 	if reflect.DeepEqual(response, yt_stats.VideoOutbound{}) {
 		t.Error("function returned empty struct")
 	}
-	if !reflect.DeepEqual(response, expected) {
-		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, response)
+	if response.Videos[0].Id != strings.Split(getVideoIds(t), ",")[0] {
+		t.Error("handler returned wrong body, got back wrong video id")
+	}
+	if response.VideoStats == nil {
+		t.Error("handler returned wrong body, got back no stats despite asking for them")
 	}
 }
 

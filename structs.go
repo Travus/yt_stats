@@ -217,5 +217,6 @@ type PlaylistOutbound struct {
 
 // Represents the JSON sent by the Video endpoint.
 type VideoOutbound struct {
-	Videos []Video `json:"videos"`
+	VideoStats *VideoStats `json:"video_stats,omitempty"`
+	Videos     []Video     `json:"videos"`
 }
