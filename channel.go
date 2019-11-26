@@ -29,7 +29,7 @@ func ChannelHandler(input Inputs) http.Handler {
 				sendStatusCode(w, http.StatusBadRequest, "tooManyItems")
 				return
 			}
-			resp, err := http.Get(fmt.Sprintf("%s?part=id,snippet,contentDetails,statistics&id=%s&key=%s&maxResults=50",
+			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s",
 				input.ChannelsRoot, url.QueryEscape(ids), key))
 			if err != nil {
 				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")

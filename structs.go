@@ -222,7 +222,7 @@ type VideoOutbound struct {
 }
 
 // Represents the JSON received from the YouTube CommentThreads endpoint.
-type CommentThreadsInbound struct {
+type CommentsInbound struct {
 	NextPageToken string `json:"nextPageToken"`
 	Items         []struct {
 		Snippet struct {
@@ -260,7 +260,7 @@ type CommentThreadsInbound struct {
 }
 
 // Represents the JSON received from the YouTube Comments endpoint.
-type CommentsInbound struct {
+type RepliesInbound struct {
 	NextPageToken string `json:"nextPageToken"`
 	Items         []struct {
 		Id      string `json:"id"`
