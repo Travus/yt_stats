@@ -279,20 +279,29 @@ type RepliesInbound struct {
 
 // Represents the JSON for one comment or reply. Part of CommentOutbound.
 type Comment struct {
-	Type             string    `json:"type"`
-	Id               string    `json:"id"`
-	AuthorName       string    `json:"author_name"`
-	AuthorId         string    `json:"author_id"`
-	AuthorChannelURL string    `json:"author_channel_url"`
-	Message          string    `json:"message"`
-	Likes            int       `json:"likes"`
-	PublishedAt      string    `json:"published_at"`
-	ReplyCount       *int      `json:"reply_count,omitempty"`
-	Replies          []Comment `json:"replies,omitempty"`
+	Type             string `json:"type"`
+	Id               string `json:"id"`
+	ParentId         string `json:"parent_id"`
+	AuthorName       string `json:"author_name"`
+	AuthorId         string `json:"author_id"`
+	AuthorChannelURL string `json:"author_channel_url"`
+	Message          string `json:"message"`
+	Likes            int    `json:"likes"`
+	PublishedAt      string `json:"published_at"`
+	ReplyCount       *int   `json:"reply_count,omitempty"`
 }
 
 // Represents the JSON sent by the Comment endpoint.
 type CommentOutbound struct {
 	VideoId  string    `json:"video_id"`
 	Comments []Comment `json:"comments"`
+}
+
+// Represents the JSON for a search query.
+type Search struct {
+	CaseSensitive bool     `json:"case_sensitive"`
+	MatchAny      bool     `json:"match_any"`
+	Reductive     bool     `json:"reductive"`
+	Users         []string `json:"users"`
+	Content       []string `json:"content"`
 }

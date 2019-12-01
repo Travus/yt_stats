@@ -214,6 +214,10 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 	return nil
 }
 
-func FullPlaylistParser(inbound PlaylistInbound, stats bool, videos bool) PlaylistOutbound {
-	return PlaylistOutbound{}
+func CommentsParser(inbound CommentsInbound, comments *[]Comment) error {
+	return nil
+}
+
+func RepliesParser(inbound RepliesInbound, comments *[]Comment) error {
+	return nil
 }
