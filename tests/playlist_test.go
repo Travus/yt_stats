@@ -181,7 +181,7 @@ func TestPlaylistHandlerInvalidKey(t *testing.T) {
 }
 
 func TestPlaylistHandlerNoKey(t *testing.T) {
-	keyMissing(t, yt_stats.PlaylistHandler, fmt.Sprintf("/ytstats/v1/channel/?id=%s", PlaylistIds))
+	keyMissing(t, yt_stats.PlaylistHandler, fmt.Sprintf("/ytstats/v1/playlist/?id=%s", PlaylistIds))
 }
 
 func TestPlaylistHandlerInvalidFlag(t *testing.T) {
