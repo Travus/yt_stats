@@ -277,8 +277,21 @@ type RepliesInbound struct {
 	} `json:"items"`
 }
 
-// Represents the JSON for one comment or reply. Part of CommentOutbound.
+// Represents the JSON for one comment. Part of CommentOutbound.
 type Comment struct {
+	Type             string `json:"type"`
+	Id               string `json:"id"`
+	AuthorName       string `json:"author_name"`
+	AuthorId         string `json:"author_id"`
+	AuthorChannelURL string `json:"author_channel_url"`
+	Message          string `json:"message"`
+	Likes            int    `json:"likes"`
+	PublishedAt      string `json:"published_at"`
+	ReplyCount       int    `json:"reply_count,omitempty"`
+}
+
+// Represents the JSON for one reply. Part of CommentOutbound.
+type Reply struct {
 	Type             string `json:"type"`
 	Id               string `json:"id"`
 	ParentId         string `json:"parent_id"`
@@ -288,13 +301,12 @@ type Comment struct {
 	Message          string `json:"message"`
 	Likes            int    `json:"likes"`
 	PublishedAt      string `json:"published_at"`
-	ReplyCount       *int   `json:"reply_count,omitempty"`
 }
 
 // Represents the JSON sent by the Comment endpoint.
 type CommentOutbound struct {
-	VideoId  string    `json:"video_id"`
-	Comments []Comment `json:"comments"`
+	VideoId  string        `json:"video_id"`
+	Comments []interface{} `json:"comments"`
 }
 
 // Represents the JSON for a search query.

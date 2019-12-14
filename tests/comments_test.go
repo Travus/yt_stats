@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -14,18 +15,69 @@ import (
 
 const videoId = "zqfZs3Z7vy8"
 
-func TestCommentsParser(t *testing.T) {
-	var inbound yt_stats.CommentsInbound
-	var expected []yt_stats.Comment
-	var outbound []yt_stats.Comment
-	parseFile(t, "res/commentthreads_inbound.json", &inbound)
-	parseFile(t, "res/commentthreads_outbound.json", &expected)
-	err := yt_stats.CommentsParser(inbound, &outbound)
+func fromFileFixer(t *testing.T, f string) []interface{} {
+	var inbound []interface{}
+	read, err := os.Open(f)
 	if err != nil {
 		t.Fatal(err)
 	}
+	err = json.NewDecoder(read).Decode(&inbound)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = read.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	outbound := make([]interface{}, len(inbound))
+	for i, rawEntry := range inbound {
+		if entry, ok := rawEntry.(map[string]interface{}); ok {
+			if entry["type"] == "comment" {
+				outbound[i] = yt_stats.Comment{
+					Type:             entry["type"].(string),
+					Id:               entry["id"].(string),
+					AuthorName:       entry["author_name"].(string),
+					AuthorId:         entry["author_id"].(string),
+					AuthorChannelURL: entry["author_channel_url"].(string),
+					Message:          entry["message"].(string),
+					Likes:            int(entry["likes"].(float64)),
+					PublishedAt:      entry["published_at"].(string),
+					ReplyCount:       int(entry["reply_count"].(float64)),
+				}
+			} else if entry["type"] == "reply" {
+				outbound[i] = yt_stats.Reply{
+					Type:             entry["type"].(string),
+					Id:               entry["id"].(string),
+					ParentId:         entry["parent_id"].(string),
+					AuthorName:       entry["author_name"].(string),
+					AuthorId:         entry["author_id"].(string),
+					AuthorChannelURL: entry["author_channel_url"].(string),
+					Message:          entry["message"].(string),
+					Likes:            int(entry["likes"].(float64)),
+					PublishedAt:      entry["published_at"].(string),
+				}
+			} else {
+				outbound[i] = nil
+			}
+		}
+	}
+	return outbound
+}
+
+func TestCommentsParser(t *testing.T) {
+	var inbound yt_stats.CommentsInbound
+	var expected []interface{}
+	var outbound []interface{}
+	var replies []string
+	parseFile(t, "res/commentthreads_inbound.json", &inbound)
+	expected = fromFileFixer(t, "res/commentthreads_outbound.json")
+	yt_stats.CommentsParser(inbound, &outbound, &replies)
+	yt_stats.SortComments(&outbound)
 	if reflect.DeepEqual(outbound, []yt_stats.Comment{}) {
 		t.Error("function returned empty struct")
+	}
+	if len(replies) != 0 {
+		t.Errorf("function parsed struct incorrectly: expected 0 replies actually %d", len(replies))
 	}
 	if !reflect.DeepEqual(outbound, expected) {
 		t.Errorf("function parsed struct incorrectly: expected %+v actually %+v", expected, outbound)
@@ -34,14 +86,12 @@ func TestCommentsParser(t *testing.T) {
 
 func TestRepliesParser(t *testing.T) {
 	var inbound yt_stats.RepliesInbound
-	var expected []yt_stats.Comment
-	var outbound []yt_stats.Comment
+	var expected []interface{}
+	var outbound []interface{}
 	parseFile(t, "res/comments_inbound.json", &inbound)
-	parseFile(t, "res/comments_outbound.json", &expected)
-	err := yt_stats.RepliesParser(inbound, &outbound)
-	if err != nil {
-		t.Fatal(err)
-	}
+	expected = fromFileFixer(t, "res/comments_outbound.json")
+	yt_stats.RepliesParser(inbound, &outbound)
+	yt_stats.SortComments(&outbound)
 	if reflect.DeepEqual(outbound, []yt_stats.Comment{}) {
 		t.Error("function returned empty struct")
 	}
