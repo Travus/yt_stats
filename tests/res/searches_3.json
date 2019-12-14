@@ -1,1 +1,1 @@
-[{"match_any": false,"content": ["test", "message"]}]
+[{"match_any": true,"content": ["test", "message"]}]
