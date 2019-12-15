@@ -287,7 +287,7 @@ type Comment struct {
 	Message          string `json:"message"`
 	Likes            int    `json:"likes"`
 	PublishedAt      string `json:"published_at"`
-	ReplyCount       int    `json:"reply_count,omitempty"`
+	ReplyCount       int    `json:"reply_count"`
 }
 
 // Represents the JSON for one reply. Part of CommentOutbound.

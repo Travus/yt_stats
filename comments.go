@@ -1,7 +1,10 @@
 package yt_stats
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"sort"
 	"strings"
@@ -49,9 +52,11 @@ func searchContent(substrings []string, message string, caseSensitive bool) (boo
 
 // The logic used to filter through comments and replies based on multiple searches.
 func CommentSearch(searches []Search, comments []interface{}) (bool, []interface{}) {
+	if searches == nil {
+		return true, comments
+	}
 	var matches []interface{}
 	for _, search := range searches {
-		fmt.Printf("%+v", search)
 		if search.Reductive {
 			var newMatches []interface{}
 			for _, match := range matches {
@@ -105,7 +110,6 @@ func CommentSearch(searches []Search, comments []interface{}) (bool, []interface
 			}
 			comments = commentsLeft
 		}
-		fmt.Printf("matches: %d, comments: %d\n", len(matches), len(comments))
 	}
 	return true, matches
 }
@@ -114,6 +118,96 @@ func CommentsHandler(input Inputs) http.Handler {
 	comments := func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
+			key := r.URL.Query().Get("key")
+			if key == "" {
+				sendStatusCode(w, http.StatusBadRequest, "keyMissing")
+				return
+			}
+			id := r.URL.Query().Get("id")
+			if id == "" {
+				sendStatusCode(w, http.StatusBadRequest, "videoIdMissing")
+				return
+			}
+			var searches []Search
+			if r.Body != nil {
+				r.Body = http.MaxBytesReader(w, r.Body, 1048576) // Read max 1 MB
+				searchErr := json.NewDecoder(r.Body).Decode(&searches)
+				if searchErr != nil && searchErr.Error() == "http: request body too large" {
+					sendStatusCode(w, http.StatusRequestEntityTooLarge, "searchBodyTooLarge")
+					return
+				} else if searchErr != nil && searchErr != io.EOF {
+					print(searchErr.Error())
+					sendStatusCode(w, http.StatusBadRequest, "searchBodyInvalid")
+					return
+				}
+			}
+			var commentsOutbound CommentOutbound
+			commentsOutbound.VideoId = id
+			var comments []interface{}
+			var needReplies []string
+			pageToken := ""
+			for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
+				var youtubeStatus StatusCodeOutbound
+				var commentsInbound CommentsInbound
+				ok:= func() bool {  // Internal function for deferring the closing of response bodies inside loop.
+					resp, err := http.Get(fmt.Sprintf("%s&videoId=%s&key=%s&pageToken=%s",
+						input.CommentsRoot, id, key, pageToken))
+					if err != nil {
+						sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
+						return false
+					}
+					defer resp.Body.Close()
+					youtubeStatus = ErrorParser(resp.Body, &commentsInbound)
+					if youtubeStatus.StatusCode != http.StatusOK {
+						sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
+						return false
+					}
+					CommentsParser(commentsInbound, &comments, &needReplies)
+					pageToken = commentsInbound.NextPageToken
+					return true
+				}
+				if !ok() {
+					return
+				}
+			}
+			for _, comId := range needReplies {
+				pageToken = ""
+				for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
+					var youtubeStatus StatusCodeOutbound
+					var repliesInbound RepliesInbound
+					ok:= func() bool {  // Internal function for deferring the closing of response bodies inside loop.
+						resp, err := http.Get(fmt.Sprintf("%s&parentId=%s&key=%s&pageToken=%s",
+							input.RepliesRoot, comId, key, pageToken))
+						if err != nil {
+							sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
+							return false
+						}
+						defer resp.Body.Close()
+						youtubeStatus = ErrorParser(resp.Body, &repliesInbound)
+						if youtubeStatus.StatusCode != http.StatusOK {
+							sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
+							return false
+						}
+						RepliesParser(repliesInbound, &comments)
+						pageToken = repliesInbound.NextPageToken
+						return true
+					}
+					if !ok() {
+						return
+					}
+				}
+			}
+			ok, filteredComments := CommentSearch(searches, comments)
+			if !ok {
+				sendStatusCode(w, http.StatusInternalServerError, "failedFilteringComments")
+				return
+			}
+			SortComments(&comments)
+			commentsOutbound.Comments = filteredComments
+			err := json.NewEncoder(w).Encode(commentsOutbound)
+			if err != nil {
+				log.Println("Failed to respond to playlist endpoint.")
+			}
 			return
 		default:
 			unsupportedRequestType(w)

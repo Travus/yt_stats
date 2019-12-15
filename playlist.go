@@ -80,8 +80,8 @@ func PlaylistHandler(input Inputs) http.Handler {
 						pageToken = playlistItemPageInbound.NextPageToken
 						playlistItemsInbound = append(playlistItemsInbound, playlistItemPageInbound)
 						return true
-					}()
-					if !ok {
+					}
+					if !ok() {
 						return
 					}
 				}

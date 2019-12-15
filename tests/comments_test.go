@@ -232,6 +232,24 @@ func TestCommentsHandlerInvalidKey(t *testing.T) {
 	}
 }
 
+func TestCommentsHandlerInvalidSearch(t *testing.T) {
+	body := "invalid"
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=invalid&id=%s", videoId), strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := yt_stats.CommentsHandler(getInputs())
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
+	}
+	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"searchBodyInvalid"}`, http.StatusBadRequest)
+	if strings.Trim(rr.Body.String(), "\n") != expected {
+		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
+	}
+}
+
 func TestCommentsHandlerNoKey(t *testing.T) {
 	keyMissing(t, yt_stats.CommentsHandler, fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId))
 }
