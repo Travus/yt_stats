@@ -117,7 +117,6 @@ func TestCommentSearch(t *testing.T) {
 	searches= nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_2.json", &searches)
-	print("num 2 here now")
 	worked, results = yt_stats.CommentSearch(searches, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 2.")

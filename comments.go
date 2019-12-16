@@ -136,7 +136,6 @@ func CommentsHandler(input Inputs) http.Handler {
 					sendStatusCode(w, http.StatusRequestEntityTooLarge, "searchBodyTooLarge")
 					return
 				} else if searchErr != nil && searchErr != io.EOF {
-					print(searchErr.Error())
 					sendStatusCode(w, http.StatusBadRequest, "searchBodyInvalid")
 					return
 				}
