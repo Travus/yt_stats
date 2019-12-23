@@ -47,6 +47,9 @@ func TestChannelHandlerSuccess(t *testing.T) {
 	if response.Channels[0].Id != ChannelId {
 		t.Error("handler returned wrong body, got back wrong channel id.")
 	}
+	if response.QuotaUsage != 3 {
+		t.Errorf("handler returned wrong quota usage: expected %d actually %d", 3, response.QuotaUsage)
+	}
 }
 
 func TestChannelHandlerInvalidKey(t *testing.T) {
@@ -61,7 +64,7 @@ func TestChannelHandlerInvalidKey(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -82,7 +85,8 @@ func TestChannelHandlerNoChannel(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"channelIdMissing"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"channelIdMissing"}`,
+		http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -100,7 +104,7 @@ func TestChannelHandlerTooManyChannels(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"tooManyItems"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"tooManyItems"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}

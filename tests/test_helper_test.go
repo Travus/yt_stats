@@ -62,7 +62,7 @@ func keyMissing(t *testing.T, f func(inputs yt_stats.Inputs) http.Handler, url s
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyMissing"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"keyMissing"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -79,7 +79,8 @@ func unsupportedRequestType(t *testing.T, f func(inputs yt_stats.Inputs) http.Ha
 	if status := rr.Code; status != http.StatusMethodNotAllowed {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusMethodNotAllowed, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"methodNotSupported"}`, http.StatusMethodNotAllowed)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"methodNotSupported"}`,
+		http.StatusMethodNotAllowed)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
