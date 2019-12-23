@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // This function parses a youtube response into a given struct, and returns a status code struct with OK or response.
@@ -214,6 +215,54 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 	return nil
 }
 
-func FullPlaylistParser(inbound PlaylistInbound, stats bool, videos bool) PlaylistOutbound {
-	return PlaylistOutbound{}
+func CommentsParser(inbound CommentsInbound, comments *[]interface{}, replies *[]string) {
+	for _, item := range inbound.Items {
+		com := Comment{
+			Type:             "comment",
+			Id:               item.Snippet.TopLevelComment.Id,
+			AuthorName:       item.Snippet.TopLevelComment.Snippet.AuthorDisplayName,
+			AuthorId:         item.Snippet.TopLevelComment.Snippet.AuthorChannelId.Value,
+			AuthorChannelURL: item.Snippet.TopLevelComment.Snippet.AuthorChannelUrl,
+			Message:          item.Snippet.TopLevelComment.Snippet.TextDisplay,
+			Likes:            item.Snippet.TopLevelComment.Snippet.LikeCount,
+			PublishedAt:      item.Snippet.TopLevelComment.Snippet.PublishedAt,
+			ReplyCount:       item.Snippet.TotalReplyCount,
+		}
+		*comments = append(*comments, com)
+		if len(item.Replies.Comments) == item.Snippet.TotalReplyCount {
+			for _, repItem := range item.Replies.Comments {
+				rep := Reply{
+					Type:             "reply",
+					Id:               repItem.Id,
+					ParentId:         repItem.Id[:strings.IndexByte(repItem.Id, '.')],
+					AuthorName:       repItem.Snippet.AuthorDisplayName,
+					AuthorId:         repItem.Snippet.AuthorChannelId.Value,
+					AuthorChannelURL: repItem.Snippet.AuthorChannelUrl,
+					Message:          repItem.Snippet.TextDisplay,
+					Likes:            repItem.Snippet.LikeCount,
+					PublishedAt:      repItem.Snippet.PublishedAt,
+				}
+				*comments = append(*comments, rep)
+			}
+		} else {
+			*replies = append(*replies, com.Id)
+		}
+	}
+}
+
+func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
+	for _, item := range inbound.Items {
+		rep := Reply{
+			Type:             "reply",
+			Id:               item.Id,
+			ParentId:         item.Id[:strings.IndexByte(item.Id, '.')],
+			AuthorName:       item.Snippet.AuthorDisplayName,
+			AuthorId:         item.Snippet.AuthorChannelId.Value,
+			AuthorChannelURL: item.Snippet.AuthorChannelUrl,
+			Message:          item.Snippet.TextDisplay,
+			Likes:            item.Snippet.LikeCount,
+			PublishedAt:      item.Snippet.PublishedAt,
+		}
+		*comments = append(*comments, rep)
+	}
 }

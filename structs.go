@@ -220,3 +220,100 @@ type VideoOutbound struct {
 	VideoStats *VideoStats `json:"video_stats,omitempty"`
 	Videos     []Video     `json:"videos"`
 }
+
+// Represents the JSON received from the YouTube CommentThreads endpoint.
+type CommentsInbound struct {
+	NextPageToken string `json:"nextPageToken"`
+	Items         []struct {
+		Snippet struct {
+			TopLevelComment struct {
+				Id      string `json:"id"`
+				Snippet struct {
+					AuthorDisplayName string `json:"authorDisplayName"`
+					AuthorChannelUrl  string `json:"authorChannelUrl"`
+					AuthorChannelId   struct {
+						Value string `json:"value"`
+					} `json:"authorChannelId"`
+					TextDisplay string `json:"textDisplay"`
+					LikeCount   int    `json:"likeCount"`
+					PublishedAt string `json:"publishedAt"`
+				} `json:"snippet"`
+			} `json:"topLevelComment"`
+			TotalReplyCount int `json:"totalReplyCount"`
+		} `json:"snippet"`
+		Replies struct {
+			Comments []struct {
+				Id      string `json:"id"`
+				Snippet struct {
+					AuthorDisplayName string `json:"authorDisplayName"`
+					AuthorChannelUrl  string `json:"authorChannelUrl"`
+					AuthorChannelId   struct {
+						Value string `json:"value"`
+					} `json:"authorChannelId"`
+					TextDisplay string `json:"textDisplay"`
+					LikeCount   int    `json:"likeCount"`
+					PublishedAt string `json:"publishedAt"`
+				} `json:"snippet"`
+			} `json:"comments"`
+		} `json:"replies"`
+	} `json:"items"`
+}
+
+// Represents the JSON received from the YouTube Comments endpoint.
+type RepliesInbound struct {
+	NextPageToken string `json:"nextPageToken"`
+	Items         []struct {
+		Id      string `json:"id"`
+		Snippet struct {
+			AuthorDisplayName string `json:"authorDisplayName"`
+			AuthorChannelUrl  string `json:"authorChannelUrl"`
+			AuthorChannelId   struct {
+				Value string `json:"value"`
+			} `json:"authorChannelId"`
+			TextDisplay string `json:"textDisplay"`
+			LikeCount   int    `json:"likeCount"`
+			PublishedAt string `json:"publishedAt"`
+		} `json:"snippet"`
+	} `json:"items"`
+}
+
+// Represents the JSON for one comment. Part of CommentOutbound.
+type Comment struct {
+	Type             string `json:"type"`
+	Id               string `json:"id"`
+	AuthorName       string `json:"author_name"`
+	AuthorId         string `json:"author_id"`
+	AuthorChannelURL string `json:"author_channel_url"`
+	Message          string `json:"message"`
+	Likes            int    `json:"likes"`
+	PublishedAt      string `json:"published_at"`
+	ReplyCount       int    `json:"reply_count"`
+}
+
+// Represents the JSON for one reply. Part of CommentOutbound.
+type Reply struct {
+	Type             string `json:"type"`
+	Id               string `json:"id"`
+	ParentId         string `json:"parent_id"`
+	AuthorName       string `json:"author_name"`
+	AuthorId         string `json:"author_id"`
+	AuthorChannelURL string `json:"author_channel_url"`
+	Message          string `json:"message"`
+	Likes            int    `json:"likes"`
+	PublishedAt      string `json:"published_at"`
+}
+
+// Represents the JSON sent by the Comment endpoint.
+type CommentOutbound struct {
+	VideoId  string        `json:"video_id"`
+	Comments []interface{} `json:"comments"`
+}
+
+// Represents the JSON for a search query.
+type Search struct {
+	CaseSensitive bool     `json:"case_sensitive"`
+	MatchAny      bool     `json:"match_any"`
+	Reductive     bool     `json:"reductive"`
+	Users         []string `json:"users"`
+	Content       []string `json:"content"`
+}

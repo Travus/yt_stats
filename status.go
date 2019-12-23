@@ -19,7 +19,7 @@ func StatusHandler(input Inputs) http.Handler {
 				return
 			}
 			uptime := time.Since(input.StartTime).Round(time.Second).Seconds()
-			resp, err := http.Get(fmt.Sprintf("%s?part=id&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s",
+			resp, err := http.Get(fmt.Sprintf("%s&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s",
 				input.ChannelsRoot, key))
 			if err != nil {
 				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")

@@ -34,8 +34,7 @@ func VideoHandler(input Inputs) http.Handler {
 				sendStatusCode(w, http.StatusBadRequest, "flagInvalid")
 				return
 			}
-			resp, err := http.Get(fmt.Sprintf("%s?part=snippet,contentDetails,statistics&id=%s&key=%s&" +
-				"maxResults=50", input.VideosRoot, url.QueryEscape(ids), key))
+			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s", input.VideosRoot, url.QueryEscape(ids), key))
 			if err != nil {
 				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return

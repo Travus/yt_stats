@@ -39,7 +39,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 				sendStatusCode(w, http.StatusBadRequest, "flagInvalid")
 				return
 			}
-			resp, err := http.Get(fmt.Sprintf("%s?part=snippet,contentDetails&id=%s&key=%s&maxResults=50",
+			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s",
 				input.PlaylistsRoot, url.QueryEscape(ids), key))
 			if err != nil {
 				sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
@@ -65,8 +65,8 @@ func PlaylistHandler(input Inputs) http.Handler {
 				for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
 					var playlistItemPageInbound PlaylistItemsInbound
 					ok := func() bool {  // Internal function for deferring the closing of response bodies inside loop.
-						resp, err = http.Get(fmt.Sprintf("%s?part=snippet&playlistId=%s&key=%s&maxResults=50&" +
-							"pageToken=%s", input.PlaylistItemsRootRoot, plOutbound.Playlists[i].Id, key, pageToken))
+						resp, err = http.Get(fmt.Sprintf("%s&playlistId=%s&key=%s&pageToken=%s",
+							input.PlaylistItemsRootRoot, plOutbound.Playlists[i].Id, key, pageToken))
 						if err != nil {
 							sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 							return false
@@ -80,8 +80,8 @@ func PlaylistHandler(input Inputs) http.Handler {
 						pageToken = playlistItemPageInbound.NextPageToken
 						playlistItemsInbound = append(playlistItemsInbound, playlistItemPageInbound)
 						return true
-					}()
-					if !ok {
+					}
+					if !ok() {
 						return
 					}
 				}
@@ -91,8 +91,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 					var videoInboundPage VideoInbound
 					ok := func() bool {
 						videoPageIds := url.QueryEscape(strings.Join(page, ","))
-						resp, err = http.Get(fmt.Sprintf("%s?part=snippet,contentDetails,statistics&id=%s&key=%s&" +
-							"maxResults=50", input.VideosRoot, videoPageIds, key))
+						resp, err = http.Get(fmt.Sprintf("%s&id=%s&key=%s", input.VideosRoot, videoPageIds, key))
 						if err != nil {
 							sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 							return false
