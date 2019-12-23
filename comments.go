@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // Sorts the comments slice based on comment and reply publishing time.
@@ -16,13 +17,17 @@ func SortComments(comments *[]interface{}) {
 		switch com1 := (*comments)[i].(type) {
 		case Comment:
 			switch com2 := (*comments)[j].(type) {
-			case Comment: return com1.PublishedAt < com2.PublishedAt
-			case Reply: return com1.PublishedAt < com2.PublishedAt
+			case Comment:
+				return com1.PublishedAt < com2.PublishedAt
+			case Reply:
+				return com1.PublishedAt < com2.PublishedAt
 			}
 		case Reply:
 			switch com2 := (*comments)[j].(type) {
-			case Comment: return com1.PublishedAt < com2.PublishedAt
-			case Reply: return com1.PublishedAt < com2.PublishedAt
+			case Comment:
+				return com1.PublishedAt < com2.PublishedAt
+			case Reply:
+				return com1.PublishedAt < com2.PublishedAt
 			}
 		}
 		return false
@@ -114,7 +119,49 @@ func CommentSearch(searches []Search, comments []interface{}) (bool, []interface
 	return true, matches
 }
 
+// Worker function that gets replies for comments from a channel of comment IDs. Handles pagination of replies.
+// Parses retrieved replies into the comments slice if no errors are found. Otherwise drains channel to save on quota.
+func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *sync.Mutex, inp Inputs, k string) {
+	for comId := range in {
+		pageToken := ""
+		for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
+			var youtubeStatus StatusCodeOutbound
+			var repliesInbound RepliesInbound
+			ok := func() StatusCodeOutbound { // Function for deferring the closing of response bodies inside loop.
+				resp, err := http.Get(fmt.Sprintf("%s&parentId=%s&key=%s&pageToken=%s",
+					inp.RepliesRoot, comId, k, pageToken))
+				if err != nil {
+					return StatusCodeOutbound{
+						StatusCode:    http.StatusInternalServerError,
+						StatusMessage: "failedToQueryYouTubeAPI",
+					}
+				}
+				defer resp.Body.Close()
+				youtubeStatus = ErrorParser(resp.Body, &repliesInbound)
+				if youtubeStatus.StatusCode != http.StatusOK {
+					return youtubeStatus
+				}
+				m.Lock()
+				RepliesParser(repliesInbound, c)
+				m.Unlock()
+				pageToken = repliesInbound.NextPageToken
+				return youtubeStatus
+			}
+			if ret := ok(); ret.StatusCode != http.StatusOK {
+				r <- ret
+				for range in {} // Encountered an error, drain channel to save quota.
+				return
+			}
+		}
+	}
+	r <- StatusCodeOutbound{
+		StatusCode:    http.StatusOK,
+		StatusMessage: "ok",
+	}
+}
+
 func CommentsHandler(input Inputs) http.Handler {
+	workers := 10
 	comments := func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -148,7 +195,7 @@ func CommentsHandler(input Inputs) http.Handler {
 			for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
 				var youtubeStatus StatusCodeOutbound
 				var commentsInbound CommentsInbound
-				ok:= func() bool {  // Internal function for deferring the closing of response bodies inside loop.
+				ok := func() bool { // Internal function for deferring the closing of response bodies inside loop.
 					resp, err := http.Get(fmt.Sprintf("%s&videoId=%s&key=%s&pageToken=%s",
 						input.CommentsRoot, id, key, pageToken))
 					if err != nil {
@@ -169,31 +216,27 @@ func CommentsHandler(input Inputs) http.Handler {
 					return
 				}
 			}
+			replyIds := make(chan string, len(needReplies))
 			for _, comId := range needReplies {
-				pageToken = ""
-				for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
-					var youtubeStatus StatusCodeOutbound
-					var repliesInbound RepliesInbound
-					ok:= func() bool {  // Internal function for deferring the closing of response bodies inside loop.
-						resp, err := http.Get(fmt.Sprintf("%s&parentId=%s&key=%s&pageToken=%s",
-							input.RepliesRoot, comId, key, pageToken))
-						if err != nil {
-							sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
-							return false
-						}
-						defer resp.Body.Close()
-						youtubeStatus = ErrorParser(resp.Body, &repliesInbound)
-						if youtubeStatus.StatusCode != http.StatusOK {
-							sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
-							return false
-						}
-						RepliesParser(repliesInbound, &comments)
-						pageToken = repliesInbound.NextPageToken
-						return true
-					}
-					if !ok() {
-						return
-					}
+				replyIds <- comId
+			}
+			close(replyIds)
+			var wg sync.WaitGroup
+			var mut sync.Mutex
+			workerResponses := make(chan StatusCodeOutbound, workers)
+			wg.Add(workers)
+			for i := 0; i < workers; i++ {  // Launch workers.
+				go func() {
+					worker(replyIds, &comments, workerResponses, &mut, input, key)
+					wg.Done()
+				}()
+			}
+			wg.Wait()
+			close(workerResponses)
+			for response := range workerResponses {
+				if response.StatusCode != http.StatusOK {
+					sendStatusCode(w, response.StatusCode, response.StatusMessage)
+					return
 				}
 			}
 			ok, filteredComments := CommentSearch(searches, comments)
