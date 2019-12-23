@@ -61,60 +61,40 @@ func CommentSearch(searches []Search, comments []interface{}) (bool, []interface
 		return true, comments
 	}
 	var matches []interface{}
+	var source []interface{}
 	for _, search := range searches {
-		if search.Reductive {
-			var newMatches []interface{}
-			for _, match := range matches {
-				if com, ok := match.(Comment); ok {
-					anyContent, allContent := searchContent(search.Content, com.Message, search.CaseSensitive)
-					anyUser, allUser := searchContent(search.Users, com.AuthorName, search.CaseSensitive)
-					if (search.MatchAny && (anyContent || anyUser)) || allContent && allUser {
-						newMatches = append(newMatches, com)
-					} else {
-						comments = append(comments, com)
-					}
-					continue
-				}
-				if rep, ok := match.(Reply); ok {
-					anyContent, allContent := searchContent(search.Content, rep.Message, search.CaseSensitive)
-					anyUser, allUser := searchContent(search.Users, rep.AuthorName, search.CaseSensitive)
-					if (search.MatchAny && (anyContent || anyUser)) || allContent && allUser {
-						newMatches = append(newMatches, rep)
-					} else {
-						comments = append(comments, rep)
-					}
-					continue
-				}
-				return false, nil
-			}
-			matches = newMatches
-		} else {
-			var commentsLeft []interface{}
-			for _, comment := range comments {
-				if com, ok := comment.(Comment); ok {
-					anyContent, allContent := searchContent(search.Content, com.Message, search.CaseSensitive)
-					anyUser, allUser := searchContent(search.Users, com.AuthorName, search.CaseSensitive)
-					if (search.MatchAny && (anyContent || anyUser)) || allContent && allUser {
-						matches = append(matches, com)
-					} else {
-						commentsLeft = append(commentsLeft, com)
-					}
-					continue
-				}
-				if rep, ok := comment.(Reply); ok {
-					anyContent, allContent := searchContent(search.Content, rep.Message, search.CaseSensitive)
-					anyUser, allUser := searchContent(search.Users, rep.AuthorName, search.CaseSensitive)
-					if (search.MatchAny && (anyContent || anyUser)) || allContent && allUser {
-						matches = append(matches, rep)
-					} else {
-						commentsLeft = append(commentsLeft, rep)
-					}
-					continue
-				}
-				return false, nil
-			}
-			comments = commentsLeft
+		var match []interface{}
+		var remains []interface{}
+		if search.Reductive {  // Reductive filter, all non-matches stay.
+			source = matches
+			remains = comments
+		} else {  // Additive filter, all matches stay.
+			source = comments
+			match = matches
 		}
+		for _, item := range source {
+			var msg string
+			var name string
+			switch com := item.(type) {
+			case Comment:
+				msg = com.Message
+				name = com.AuthorName
+			case Reply:
+				msg = com.Message
+				name = com.AuthorName
+			default:
+				return false, nil
+			}
+			anyContent, allContent := searchContent(search.Content, msg, search.CaseSensitive)
+			anyUser, allUser := searchContent(search.Users, name, search.CaseSensitive)
+			if (search.MatchAny && (anyContent || anyUser)) || allContent && allUser {
+				match = append(match, item)
+			} else {
+				remains = append(remains, item)
+			}
+		}
+		matches = match
+		comments = remains
 	}
 	return true, matches
 }
