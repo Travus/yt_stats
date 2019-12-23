@@ -56,7 +56,8 @@ func searchContent(substrings []string, message string, caseSensitive bool) (boo
 }
 
 // The logic used to filter through comments and replies based on multiple searches.
-func CommentSearch(searches []Search, comments []interface{}) (bool, []interface{}) {
+// Returns a bool on if the filtering succeeded, and the result. Cannot check for nil result since empty results exist.
+func CommentFilter(searches []Search, comments []interface{}) (bool, []interface{}) {
 	if searches == nil {
 		return true, comments
 	}
@@ -101,6 +102,7 @@ func CommentSearch(searches []Search, comments []interface{}) (bool, []interface
 
 // Worker function that gets replies for comments from a channel of comment IDs. Handles pagination of replies.
 // Parses retrieved replies into the comments slice if no errors are found. Otherwise drains channel to save on quota.
+// Error or generic OK StatusCodeOutbound struct is deposited into channel to preserve and propagate errors received.
 func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *sync.Mutex, inp Inputs, k string) {
 	for comId := range in {
 		pageToken := ""
@@ -219,7 +221,7 @@ func CommentsHandler(input Inputs) http.Handler {
 					return
 				}
 			}
-			ok, filteredComments := CommentSearch(searches, comments)
+			ok, filteredComments := CommentFilter(searches, comments)
 			if !ok {
 				sendStatusCode(w, http.StatusInternalServerError, "failedFilteringComments")
 				return

@@ -106,7 +106,7 @@ func TestCommentSearch(t *testing.T) {
 	var searches []yt_stats.Search
 	testData = fromFileFixer(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_1.json", &searches)
-	worked, results := yt_stats.CommentSearch(searches, testData)
+	worked, results := yt_stats.CommentFilter(searches, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 1.")
 	}
@@ -117,7 +117,7 @@ func TestCommentSearch(t *testing.T) {
 	searches= nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_2.json", &searches)
-	worked, results = yt_stats.CommentSearch(searches, testData)
+	worked, results = yt_stats.CommentFilter(searches, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 2.")
 	}
@@ -128,7 +128,7 @@ func TestCommentSearch(t *testing.T) {
 	searches= nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_3.json", &searches)
-	worked, results = yt_stats.CommentSearch(searches, testData)
+	worked, results = yt_stats.CommentFilter(searches, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 3.")
 	}
@@ -139,7 +139,7 @@ func TestCommentSearch(t *testing.T) {
 	searches= nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_4.json", &searches)
-	worked, results = yt_stats.CommentSearch(searches, testData)
+	worked, results = yt_stats.CommentFilter(searches, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 4.")
 	}
@@ -150,7 +150,7 @@ func TestCommentSearch(t *testing.T) {
 	searches= nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_5.json", &searches)
-	worked, results = yt_stats.CommentSearch(searches, testData)
+	worked, results = yt_stats.CommentFilter(searches, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 5.")
 	}
