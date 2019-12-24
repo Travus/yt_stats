@@ -35,10 +35,13 @@ type StatusCodeOutbound struct {
 
 // Represents the JSON sent by the Status endpoint.
 type StatusOutbound struct {
-	QuotaUsage    int                `json:"quota_usage"`
-	Version       string             `json:"version"`
-	Uptime        float64            `json:"uptime"`
-	YoutubeStatus StatusCodeOutbound `json:"youtube_status"`
+	QuotaUsage    int     `json:"quota_usage"`
+	Version       string  `json:"version"`
+	Uptime        float64 `json:"uptime"`
+	YoutubeStatus struct {
+		StatusCode    int    `json:"status_code"`
+		StatusMessage string `json:"status_message"`
+	} `json:"youtube_status"`
 }
 
 // Represents the JSON received from the YouTube Channels endpoint.
