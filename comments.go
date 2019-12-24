@@ -120,7 +120,7 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 					}
 				}
 				defer resp.Body.Close()
-				quota += 3
+				quota += 2  // Snippet cost for this endpoint is 1 less than everywhere else.
 				youtubeStatus = ErrorParser(resp.Body, &repliesInbound)
 				if youtubeStatus.StatusCode != http.StatusOK {
 					return youtubeStatus
