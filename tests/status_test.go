@@ -22,8 +22,8 @@ func TestStatusHandlerValidKey(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusOK, status)
 	}
-	expected := fmt.Sprintf(`{"version":"v1","uptime":2,"youtube_status":{"status_code":%d,"status_message":"OK"}}`,
-		http.StatusOK)
+	expected := `{"quota_usage":1,"version":"v1","uptime":2,"youtube_status":` +
+		fmt.Sprintf(`{"status_code":%d,"status_message":"OK"}}`, http.StatusOK)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -41,7 +41,7 @@ func TestStatusHandlerInvalidKey(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := `{"version":"v1","uptime":1,"youtube_status":` +
+	expected := `{"quota_usage":0,"version":"v1","uptime":1,"youtube_status":` +
 		fmt.Sprintf(`{"status_code":%d,"status_message":"keyInvalid"}}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())

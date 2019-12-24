@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func sendStatusCode(w http.ResponseWriter, code int, msg string) {
+func sendStatusCode(w http.ResponseWriter, quota int, code int, msg string) {
 	response := StatusCodeOutbound{
+		QuotaUsage:    quota,
 		StatusCode:    code,
 		StatusMessage: msg,
 	}
@@ -20,7 +21,7 @@ func sendStatusCode(w http.ResponseWriter, code int, msg string) {
 }
 
 func unsupportedRequestType(w http.ResponseWriter) {
-	sendStatusCode(w, http.StatusMethodNotAllowed, "methodNotSupported")
+	sendStatusCode(w, 0, http.StatusMethodNotAllowed, "methodNotSupported")
 }
 
 func durationConverter(durStr string) (int, error) {

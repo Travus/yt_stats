@@ -181,6 +181,9 @@ func TestCommentsHandlerSuccess(t *testing.T) {
 	if !(len(response.Comments) >= 48) {
 		t.Errorf("handler returned wrong body: expected more than 48 results, received only %d", len(response.Comments))
 	}
+	if response.QuotaUsage < 5 {
+		t.Error("handler returned low quota usage.")
+	}
 }
 
 func TestCommentsHandlerSearchSuccess(t *testing.T) {
@@ -212,6 +215,9 @@ func TestCommentsHandlerSearchSuccess(t *testing.T) {
 	if len(response.Comments) > 20 || len(response.Comments) == 0 {
 		t.Errorf("handler returned wrong body: got wrong number of comments, got %d", len(response.Comments))
 	}
+	if response.QuotaUsage < 5 {
+		t.Error("handler returned low quota usage.")
+	}
 }
 
 func TestCommentsHandlerInvalidKey(t *testing.T) {
@@ -225,7 +231,7 @@ func TestCommentsHandlerInvalidKey(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -233,7 +239,8 @@ func TestCommentsHandlerInvalidKey(t *testing.T) {
 
 func TestCommentsHandlerInvalidSearch(t *testing.T) {
 	body := "invalid"
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=invalid&id=%s", videoId), strings.NewReader(body))
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=invalid&id=%s", videoId),
+		strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -243,7 +250,8 @@ func TestCommentsHandlerInvalidSearch(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"searchBodyInvalid"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"searchBodyInvalid"}`,
+		http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -265,7 +273,8 @@ func TestCommentsHandlerNoVideo(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"videoIdMissing"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"videoIdMissing"}`,
+		http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}

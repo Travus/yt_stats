@@ -6,13 +6,13 @@ import (
 
 // Stores variables sent to the handlers, basically global variables.
 type Inputs struct {
-	StartTime             time.Time
-	RepliesRoot           string
-	CommentsRoot          string
-	ChannelsRoot          string
-	PlaylistsRoot         string
-	PlaylistItemsRootRoot string
-	VideosRoot            string
+	StartTime         time.Time
+	RepliesRoot       string
+	CommentsRoot      string
+	ChannelsRoot      string
+	PlaylistsRoot     string
+	PlaylistItemsRoot string
+	VideosRoot        string
 }
 
 // Represents the JSON received from a YouTube error response.
@@ -28,15 +28,20 @@ type YoutubeErrorInbound struct {
 
 // Represents the JSON sent on errors.
 type StatusCodeOutbound struct {
+	QuotaUsage    int    `json:"quota_usage"`
 	StatusCode    int    `json:"status_code"`
 	StatusMessage string `json:"status_message"`
 }
 
 // Represents the JSON sent by the Status endpoint.
 type StatusOutbound struct {
-	Version       string             `json:"version"`
-	Uptime        float64            `json:"uptime"`
-	YoutubeStatus StatusCodeOutbound `json:"youtube_status"`
+	QuotaUsage    int     `json:"quota_usage"`
+	Version       string  `json:"version"`
+	Uptime        float64 `json:"uptime"`
+	YoutubeStatus struct {
+		StatusCode    int    `json:"status_code"`
+		StatusMessage string `json:"status_message"`
+	} `json:"youtube_status"`
 }
 
 // Represents the JSON received from the YouTube Channels endpoint.
@@ -83,7 +88,8 @@ type Channel struct {
 
 // Represents the JSON sent by the Channel endpoint.
 type ChannelOutbound struct {
-	Channels []Channel `json:"channels"`
+	QuotaUsage int       `json:"quota_usage"`
+	Channels   []Channel `json:"channels"`
 }
 
 // Represents the JSON received from the YouTube Playlists endpoint.
@@ -212,11 +218,13 @@ type Playlist struct {
 
 // Represents the JSON sent by the Playlist endpoint.
 type PlaylistOutbound struct {
-	Playlists []Playlist `json:"playlists"`
+	QuotaUsage int        `json:"quota_usage"`
+	Playlists  []Playlist `json:"playlists"`
 }
 
 // Represents the JSON sent by the Video endpoint.
 type VideoOutbound struct {
+	QuotaUsage int         `json:"quota_usage"`
 	VideoStats *VideoStats `json:"video_stats,omitempty"`
 	Videos     []Video     `json:"videos"`
 }
@@ -305,8 +313,9 @@ type Reply struct {
 
 // Represents the JSON sent by the Comment endpoint.
 type CommentOutbound struct {
-	VideoId  string        `json:"video_id"`
-	Comments []interface{} `json:"comments"`
+	QuotaUsage int           `json:"quota_usage"`
+	VideoId    string        `json:"video_id"`
+	Comments   []interface{} `json:"comments"`
 }
 
 // Represents the JSON for a search query.

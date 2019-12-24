@@ -41,13 +41,13 @@ func parseFile(t *testing.T, f string, s interface{}) {
 // Gives inputs used by handlers.
 func getInputs() yt_stats.Inputs {
 	return yt_stats.Inputs{
-		StartTime:             time.Now(),
-		RepliesRoot:           "https://www.googleapis.com/youtube/v3/comments?part=snippet&maxResults=100&textFormat=plainText",
-		CommentsRoot:          "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet,replies&maxResults=100&textFormat=plainText",
-		ChannelsRoot:          "https://www.googleapis.com/youtube/v3/channels?part=id,snippet,contentDetails,statistics&maxResults=50",
-		PlaylistsRoot:         "https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&maxResults=50",
-		PlaylistItemsRootRoot: "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50",
-		VideosRoot:            "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&maxResults=50",
+		StartTime:         time.Now(),
+		RepliesRoot:       "https://www.googleapis.com/youtube/v3/comments?part=snippet&maxResults=100&textFormat=plainText",
+		CommentsRoot:      "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet,replies&maxResults=100&textFormat=plainText",
+		ChannelsRoot:      "https://www.googleapis.com/youtube/v3/channels?part=id,snippet,contentDetails,statistics&maxResults=50",
+		PlaylistsRoot:     "https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&maxResults=50",
+		PlaylistItemsRoot: "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50",
+		VideosRoot:        "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&maxResults=50",
 	}
 }
 
@@ -62,7 +62,7 @@ func keyMissing(t *testing.T, f func(inputs yt_stats.Inputs) http.Handler, url s
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyMissing"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"keyMissing"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -79,7 +79,8 @@ func unsupportedRequestType(t *testing.T, f func(inputs yt_stats.Inputs) http.Ha
 	if status := rr.Code; status != http.StatusMethodNotAllowed {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusMethodNotAllowed, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"methodNotSupported"}`, http.StatusMethodNotAllowed)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"methodNotSupported"}`,
+		http.StatusMethodNotAllowed)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}

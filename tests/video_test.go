@@ -43,6 +43,9 @@ func TestVideoHandlerSuccess(t *testing.T) {
 	if response.VideoStats == nil {
 		t.Error("handler returned wrong body, got back no stats despite asking for them")
 	}
+	if response.QuotaUsage != 7 {
+		t.Errorf("handler returned wrong quota usage: expected %d actually %d", 7, response.QuotaUsage)
+	}
 }
 
 func TestVideoHandlerInvalidKey(t *testing.T) {
@@ -56,7 +59,7 @@ func TestVideoHandlerInvalidKey(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"keyInvalid"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -78,7 +81,7 @@ func TestVideoHandlerInvalidFlag(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"flagInvalid"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"flagInvalid"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -95,7 +98,8 @@ func TestVideoHandlerNoVideo(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"channelIdMissing"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"channelIdMissing"}`,
+		http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
@@ -113,7 +117,7 @@ func TestVideoHandlerTooManyVideos(t *testing.T) {
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
 	}
-	expected := fmt.Sprintf(`{"status_code":%d,"status_message":"tooManyItems"}`, http.StatusBadRequest)
+	expected := fmt.Sprintf(`{"quota_usage":0,"status_code":%d,"status_message":"tooManyItems"}`, http.StatusBadRequest)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
 	}
