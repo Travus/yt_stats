@@ -72,7 +72,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 					var playlistItemPageInbound PlaylistItemsInbound
 					ok := func() bool {  // Internal function for deferring the closing of response bodies inside loop.
 						resp, err = http.Get(fmt.Sprintf("%s&playlistId=%s&key=%s&pageToken=%s",
-							input.PlaylistItemsRootRoot, plOutbound.Playlists[i].Id, key, pageToken))
+							input.PlaylistItemsRoot, plOutbound.Playlists[i].Id, key, pageToken))
 						if err != nil {
 							sendStatusCode(w, quota, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 							return false
