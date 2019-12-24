@@ -181,7 +181,7 @@ func TestCommentsHandlerSuccess(t *testing.T) {
 	if !(len(response.Comments) >= 48) {
 		t.Errorf("handler returned wrong body: expected more than 48 results, received only %d", len(response.Comments))
 	}
-	if response.QuotaUsage < 10 {
+	if response.QuotaUsage < 5 {
 		t.Error("handler returned low quota usage.")
 	}
 }
@@ -215,7 +215,7 @@ func TestCommentsHandlerSearchSuccess(t *testing.T) {
 	if len(response.Comments) > 20 || len(response.Comments) == 0 {
 		t.Errorf("handler returned wrong body: got wrong number of comments, got %d", len(response.Comments))
 	}
-	if response.QuotaUsage < 8 {
+	if response.QuotaUsage < 5 {
 		t.Error("handler returned low quota usage.")
 	}
 }

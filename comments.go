@@ -103,7 +103,8 @@ func CommentFilter(searches []Search, comments []interface{}) (bool, []interface
 // Worker function that gets replies for comments from a channel of comment IDs. Handles pagination of replies.
 // Parses retrieved replies into the comments slice if no errors are found. Otherwise drains channel to save on quota.
 // Error or generic OK StatusCodeOutbound struct is deposited into channel to preserve and propagate errors received.
-func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *sync.Mutex, inp Inputs, k string) {
+func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *sync.Mutex, inp Inputs, k string) int {
+	quota := 0
 	for comId := range in {
 		pageToken := ""
 		for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
@@ -119,6 +120,7 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 					}
 				}
 				defer resp.Body.Close()
+				quota += 3
 				youtubeStatus = ErrorParser(resp.Body, &repliesInbound)
 				if youtubeStatus.StatusCode != http.StatusOK {
 					return youtubeStatus
@@ -132,7 +134,7 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 			if ret := ok(); ret.StatusCode != http.StatusOK {
 				r <- ret
 				for range in {} // Encountered an error, drain channel to save quota.
-				return
+				return quota
 			}
 		}
 	}
@@ -140,21 +142,23 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 		StatusCode:    http.StatusOK,
 		StatusMessage: "ok",
 	}
+	return quota
 }
 
 func CommentsHandler(input Inputs) http.Handler {
 	workers := 10
 	comments := func(w http.ResponseWriter, r *http.Request) {
+		quota := 0
 		switch r.Method {
 		case http.MethodGet:
 			key := r.URL.Query().Get("key")
 			if key == "" {
-				sendStatusCode(w, http.StatusBadRequest, "keyMissing")
+				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
 				return
 			}
 			id := r.URL.Query().Get("id")
 			if id == "" {
-				sendStatusCode(w, http.StatusBadRequest, "videoIdMissing")
+				sendStatusCode(w, quota, http.StatusBadRequest, "videoIdMissing")
 				return
 			}
 			var searches []Search
@@ -162,10 +166,10 @@ func CommentsHandler(input Inputs) http.Handler {
 				r.Body = http.MaxBytesReader(w, r.Body, 1048576) // Read max 1 MB
 				searchErr := json.NewDecoder(r.Body).Decode(&searches)
 				if searchErr != nil && searchErr.Error() == "http: request body too large" {
-					sendStatusCode(w, http.StatusRequestEntityTooLarge, "searchBodyTooLarge")
+					sendStatusCode(w, quota, http.StatusRequestEntityTooLarge, "searchBodyTooLarge")
 					return
 				} else if searchErr != nil && searchErr != io.EOF {
-					sendStatusCode(w, http.StatusBadRequest, "searchBodyInvalid")
+					sendStatusCode(w, quota, http.StatusBadRequest, "searchBodyInvalid")
 					return
 				}
 			}
@@ -181,13 +185,17 @@ func CommentsHandler(input Inputs) http.Handler {
 					resp, err := http.Get(fmt.Sprintf("%s&videoId=%s&key=%s&pageToken=%s",
 						input.CommentsRoot, id, key, pageToken))
 					if err != nil {
-						sendStatusCode(w, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
+						sendStatusCode(w, quota, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 						return false
 					}
 					defer resp.Body.Close()
+					quota += 5
 					youtubeStatus = ErrorParser(resp.Body, &commentsInbound)
 					if youtubeStatus.StatusCode != http.StatusOK {
-						sendStatusCode(w, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
+						if youtubeStatus.StatusMessage == "keyInvalid" {  // Quota cannot be deducted from invalid keys.
+							quota -= 5
+						}
+						sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 						return false
 					}
 					CommentsParser(commentsInbound, &comments, &needReplies)
@@ -205,11 +213,15 @@ func CommentsHandler(input Inputs) http.Handler {
 			close(replyIds)
 			var wg sync.WaitGroup
 			var mut sync.Mutex
+			var add sync.Mutex
 			workerResponses := make(chan StatusCodeOutbound, workers)
 			wg.Add(workers)
 			for i := 0; i < workers; i++ {  // Launch workers.
 				go func() {
-					worker(replyIds, &comments, workerResponses, &mut, input, key)
+					n := worker(replyIds, &comments, workerResponses, &mut, input, key)
+					add.Lock()
+					quota += n
+					add.Unlock()
 					wg.Done()
 				}()
 			}
@@ -217,17 +229,18 @@ func CommentsHandler(input Inputs) http.Handler {
 			close(workerResponses)
 			for response := range workerResponses {
 				if response.StatusCode != http.StatusOK {
-					sendStatusCode(w, response.StatusCode, response.StatusMessage)
+					sendStatusCode(w, quota, response.StatusCode, response.StatusMessage)
 					return
 				}
 			}
 			ok, filteredComments := CommentFilter(searches, comments)
 			if !ok {
-				sendStatusCode(w, http.StatusInternalServerError, "failedFilteringComments")
+				sendStatusCode(w, quota, http.StatusInternalServerError, "failedFilteringComments")
 				return
 			}
 			SortComments(&comments)
 			commentsOutbound.Comments = filteredComments
+			commentsOutbound.QuotaUsage = quota
 			err := json.NewEncoder(w).Encode(commentsOutbound)
 			if err != nil {
 				log.Println("Failed to respond to playlist endpoint.")
