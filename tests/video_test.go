@@ -43,8 +43,8 @@ func TestVideoHandlerSuccess(t *testing.T) {
 	if response.VideoStats == nil {
 		t.Error("handler returned wrong body, got back no stats despite asking for them")
 	}
-	if response.QuotaUsage < 8 {
-		t.Error("handler returned low quota usage.")
+	if response.QuotaUsage != 7 {
+		t.Errorf("handler returned wrong quota usage: expected %d actually %d", 7, response.QuotaUsage)
 	}
 }
 
