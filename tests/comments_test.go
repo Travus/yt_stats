@@ -103,10 +103,10 @@ func TestRepliesParser(t *testing.T) {
 func TestCommentSearch(t *testing.T) {
 	var testData []interface{}
 	var results []interface{}
-	var searches []yt_stats.Search
+	var filters []yt_stats.Filter
 	testData = fromFileFixer(t, "res/sample_comments.json")
-	parseFile(t, "res/searches_1.json", &searches)
-	worked, results := yt_stats.CommentFilter(searches, testData)
+	parseFile(t, "res/searches_1.json", &filters)
+	worked, results := yt_stats.CommentFilter(filters, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 1.")
 	}
@@ -114,10 +114,10 @@ func TestCommentSearch(t *testing.T) {
 		t.Errorf("function returned wrong result, should have 1 comment, got %d", len(results))
 	}
 	results = nil
-	searches= nil
+	filters = nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
-	parseFile(t, "res/searches_2.json", &searches)
-	worked, results = yt_stats.CommentFilter(searches, testData)
+	parseFile(t, "res/searches_2.json", &filters)
+	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 2.")
 	}
@@ -125,10 +125,10 @@ func TestCommentSearch(t *testing.T) {
 		t.Errorf("function returned wrong result, should have 5 comments, got %d", len(results))
 	}
 	results = nil
-	searches= nil
+	filters = nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
-	parseFile(t, "res/searches_3.json", &searches)
-	worked, results = yt_stats.CommentFilter(searches, testData)
+	parseFile(t, "res/searches_3.json", &filters)
+	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 3.")
 	}
@@ -136,10 +136,10 @@ func TestCommentSearch(t *testing.T) {
 		t.Errorf("function returned wrong result, should have 5 comment, got %d", len(results))
 	}
 	results = nil
-	searches= nil
+	filters = nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
-	parseFile(t, "res/searches_4.json", &searches)
-	worked, results = yt_stats.CommentFilter(searches, testData)
+	parseFile(t, "res/searches_4.json", &filters)
+	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 4.")
 	}
@@ -147,10 +147,10 @@ func TestCommentSearch(t *testing.T) {
 		t.Errorf("function returned wrong result, should have 0 comments, got %d", len(results))
 	}
 	results = nil
-	searches= nil
+	filters = nil
 	testData = fromFileFixer(t, "res/sample_comments.json")
-	parseFile(t, "res/searches_5.json", &searches)
-	worked, results = yt_stats.CommentFilter(searches, testData)
+	parseFile(t, "res/searches_5.json", &filters)
+	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
 		t.Fatal("Failed filtering comments on search 5.")
 	}
@@ -188,9 +188,9 @@ func TestCommentsHandlerSuccess(t *testing.T) {
 
 func TestCommentsHandlerSearchSuccess(t *testing.T) {
 	var response yt_stats.CommentOutbound
-	var search []yt_stats.Search
-	parseFile(t, "res/search.json", &search)
-	body, err := json.Marshal(search)
+	var filter []yt_stats.Filter
+	parseFile(t, "res/search.json", &filter)
+	body, err := json.Marshal(filter)
 	if err != nil {
 		t.Fatal(err)
 	}

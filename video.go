@@ -9,11 +9,15 @@ import (
 	"strings"
 )
 
+// Handler for the video endpoint. /ytstats/v1/video/
+// Provides info of up to 50 videos, and statistics of them.
 func VideoHandler(input Inputs) http.Handler {
 	video := func(w http.ResponseWriter, r *http.Request) {
 		quota := 0
 		switch r.Method {
 		case http.MethodGet:
+
+			// Check user input and fail if input is incorrect or missing.
 			var youtubeStatus StatusCodeOutbound
 			videoInbound := make([]VideoInbound, 1)
 			key := r.URL.Query().Get("key")
@@ -35,6 +39,8 @@ func VideoHandler(input Inputs) http.Handler {
 				sendStatusCode(w, quota, http.StatusBadRequest, "flagInvalid")
 				return
 			}
+
+			// Query youtube videos endpoint and handle errors.
 			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s", input.VideosRoot, url.QueryEscape(ids), key))
 			if err != nil {
 				sendStatusCode(w, quota, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
@@ -50,6 +56,8 @@ func VideoHandler(input Inputs) http.Handler {
 				sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return
 			}
+
+			// Parse videos endpoint response and provide response.
 			var tempPlaylistObject Playlist
 			var videoOutbound VideoOutbound
 			err = VideoParser(videoInbound, &tempPlaylistObject, statsFlag == "true", true)
@@ -59,6 +67,7 @@ func VideoHandler(input Inputs) http.Handler {
 			videoOutbound.VideoStats = tempPlaylistObject.VideoStats
 			videoOutbound.Videos = tempPlaylistObject.Videos
 			videoOutbound.QuotaUsage = quota
+			w.Header().Set("Content-Type", "application/json")
 			err = json.NewEncoder(w).Encode(videoOutbound)
 			if err != nil {
 				log.Println("Failed to respond to playlist endpoint.")

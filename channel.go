@@ -9,11 +9,15 @@ import (
 	"strings"
 )
 
+// Handler for the channel endpoint. /ytstats/v1/channel/
+// Provides statistics for up to 50 channels.
 func ChannelHandler(input Inputs) http.Handler {
 	channel := func(w http.ResponseWriter, r *http.Request) {
 		quota := 0
 		switch r.Method {
 		case http.MethodGet:
+
+			// Check user input and fail if input is incorrect or missing.
 			var youtubeStatus StatusCodeOutbound
 			var channelInbound ChannelInbound
 			key := r.URL.Query().Get("key")
@@ -30,8 +34,9 @@ func ChannelHandler(input Inputs) http.Handler {
 				sendStatusCode(w, quota, http.StatusBadRequest, "tooManyItems")
 				return
 			}
-			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s",
-				input.ChannelsRoot, url.QueryEscape(ids), key))
+
+			// Query youtube and check response for errors.
+			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s", input.ChannelsRoot, url.QueryEscape(ids), key))
 			if err != nil {
 				sendStatusCode(w, quota, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return
@@ -46,8 +51,11 @@ func ChannelHandler(input Inputs) http.Handler {
 				sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return
 			}
+
+			// Process and provide response.
 			channelOutbound := ChannelParser(channelInbound)
 			channelOutbound.QuotaUsage = quota
+			w.Header().Set("Content-Type", "application/json")
 			err = json.NewEncoder(w).Encode(channelOutbound)
 			if err != nil {
 				log.Println("Failed to respond to channel endpoint.")

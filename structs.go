@@ -318,8 +318,8 @@ type CommentOutbound struct {
 	Comments   []interface{} `json:"comments"`
 }
 
-// Represents the JSON for a search query.
-type Search struct {
+// Represents the JSON for a filter query.
+type Filter struct {
 	CaseSensitive bool     `json:"case_sensitive"`
 	MatchAny      bool     `json:"match_any"`
 	Reductive     bool     `json:"reductive"`

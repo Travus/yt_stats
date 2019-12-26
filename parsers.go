@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// This function parses a youtube response into a given struct, and returns a status code struct with OK or response.
+// Parses a youtube response into a given struct, and returns a status code struct with OK or response.
 func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 	var buf bytes.Buffer
 	tee := io.TeeReader(r, &buf)
@@ -43,10 +43,13 @@ func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 			}
 		}
 	}
-	return StatusCodeOutbound{StatusCode: 200, StatusMessage: "OK"}
+	return StatusCodeOutbound{
+		StatusCode:    200,
+		StatusMessage: "OK",
+	}
 }
 
-// This function parses a inbound channel struct to a outbound channel struct.
+// Parses a ChannelInbound struct to a ChannelOutbound struct.
 func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 	var outbound ChannelOutbound
 	outbound.Channels = make([]Channel, len(inbound.Items))
@@ -82,6 +85,7 @@ func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 	return outbound
 }
 
+// Parses a PlaylistInbound struct to a PlaylistOutbound struct.
 func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 	var outbound PlaylistOutbound
 	outbound.Playlists = make([]Playlist, len(inbound.Items))
@@ -98,6 +102,7 @@ func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 	return outbound
 }
 
+// Parses a slice of PlaylistItemInbound structs to a slice of string slices including all the video IDs.
 func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
 	var outbound [][]string
 	for _, inboundPlItems := range inbound {
@@ -110,10 +115,13 @@ func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
 	return outbound
 }
 
+// Parses a slice of VideoInbound structs into a Playlist struct and returns any errors.
 func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) error {
 	var vStats VideoStats
 	totalViews, totalLikes, totalDislikes, totalComments := 0, 0, 0, 0
 	for _, videoInbound := range inbound {
+
+		// Handle overall statistics, like total duration etc.
 		for _, video := range videoInbound.Items {
 			dur, err := durationConverter(video.ContentDetails.Duration)
 			if err != nil {
@@ -139,6 +147,8 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 				return err
 			}
 			totalComments += comments
+
+			// Handle video specific statistics.
 			if videos {
 				vid := Video{
 					Id:           video.Id,
@@ -155,6 +165,8 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 				}
 				playlistObject.Videos = append(playlistObject.Videos, vid)
 			}
+
+			// Handle most/longest and least/shortest statistics.
 			if stats {
 				vStats.AvailableVideos++
 				vStats.TotalLength += dur
@@ -202,6 +214,8 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 			}
 		}
 	}
+
+	// Handle average statistics.
 	if stats {
 		vStats.AverageVideoDuration = vStats.TotalLength / vStats.AvailableVideos
 		vStats.AverageViews = vStats.TotalViews / vStats.AvailableVideos
@@ -215,6 +229,7 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 	return nil
 }
 
+// Parses a CommentsInbound struct into a slice of interfaces containing Comment and Reply structs.
 func CommentsParser(inbound CommentsInbound, comments *[]interface{}, replies *[]string) {
 	for _, item := range inbound.Items {
 		com := Comment{
@@ -250,6 +265,7 @@ func CommentsParser(inbound CommentsInbound, comments *[]interface{}, replies *[
 	}
 }
 
+// Parses a RepliesInbound struct into a slice of interfaces containing Comment and Reply structs.
 func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
 	for _, item := range inbound.Items {
 		rep := Reply{

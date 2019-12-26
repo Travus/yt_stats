@@ -22,7 +22,6 @@ func parseMockedPlaylist(t *testing.T, stats bool, videos bool) yt_stats.Playlis
 	parseFile(t, "res/video_inbound_2-1.json", &plVideos2[0])
 	parseFile(t, "res/video_inbound_2-2.json", &plVideos2[1])
 	outbound := yt_stats.PlaylistTopLevelParser(inbound)
-	// outbound.Playlists = make([]yt_stats.Playlist, 2)
 	err := yt_stats.VideoParser(plVideos1, &outbound.Playlists[0], stats, videos)
 	if err != nil {
 		t.Fatal(err)

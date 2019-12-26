@@ -8,13 +8,16 @@ import (
 	"yt_stats"
 )
 
-// Handles api root endpoint. /ytstats/v1/
-// Just delivers basic info about the API's purpose.
+// Handler for api root endpoint. /ytstats/v1/
+// Provides basic info about the API's purpose.
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		_, err := fmt.Fprintf(w, "This API provides an easy interface to filter youtube comments by author "+
-			"and comments.\nIt also provides an interface to get youtube channel stats.")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		_, err := fmt.Fprintf(w, "This API provides statistics for youtube channels, playlists and videos.\n" +
+			"Additionally it also provides an easy way to retrieve all comments and replies on a video.\n" +
+			"Comments and replies can be filtered by author and content.\n\n" +
+			"For more info see: https://github.com/Travus/yt_stats")
 		if err != nil {
 			log.Printf("Something went wrong writing REST API info.")
 		}
@@ -26,6 +29,7 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	// Set global values.
 	inputs := yt_stats.Inputs{
 		StartTime:         time.Now(),
 		RepliesRoot:       "https://www.googleapis.com/youtube/v3/comments?part=snippet&maxResults=100&textFormat=plainText",

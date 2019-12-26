@@ -8,17 +8,23 @@ import (
 	"time"
 )
 
+// Handler for the status endpoint. /ytstats/v1/status/
+// Provides version, uptime, and the status of the youtube API.
 func StatusHandler(input Inputs) http.Handler {
 	stats := func(w http.ResponseWriter, r *http.Request) {
 		quota := 0
 		switch r.Method {
 		case http.MethodGet:
+
+			// Check user input and fail if input is incorrect or missing.
 			var youtubeStatus StatusCodeOutbound
 			key := r.URL.Query().Get("key")
 			if key == "" {
 				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
 				return
 			}
+
+			// Query youtube to check for youtube API status.
 			uptime := time.Since(input.StartTime).Round(time.Second).Seconds()
 			statusRoot := "https://www.googleapis.com/youtube/v3/channels?part=id"
 			resp, err := http.Get(fmt.Sprintf("%s&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s", statusRoot, key))
@@ -32,6 +38,8 @@ func StatusHandler(input Inputs) http.Handler {
 			if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
 				quota--
 			}
+
+			// Create and provide response.
 			youtubeStatus.QuotaUsage = quota
 			response := StatusOutbound{
 				QuotaUsage: quota,

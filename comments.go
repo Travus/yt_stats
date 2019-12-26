@@ -57,7 +57,7 @@ func searchContent(substrings []string, message string, caseSensitive bool) (boo
 
 // The logic used to filter through comments and replies based on multiple searches.
 // Returns a bool on if the filtering succeeded, and the result. Cannot check for nil result since empty results exist.
-func CommentFilter(searches []Search, comments []interface{}) (bool, []interface{}) {
+func CommentFilter(searches []Filter, comments []interface{}) (bool, []interface{}) {
 	if searches == nil {
 		return true, comments
 	}
@@ -145,12 +145,16 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 	return quota
 }
 
+// Handler for the comments endpoint. /ytstats/v1/comments/
+// Provides a list of all comments and replies of a video. Can be extensively filtered via filters in request body.
 func CommentsHandler(input Inputs) http.Handler {
 	workers := 10
 	comments := func(w http.ResponseWriter, r *http.Request) {
 		quota := 0
 		switch r.Method {
 		case http.MethodGet:
+
+			// Check user input and fail if input is incorrect or missing.
 			key := r.URL.Query().Get("key")
 			if key == "" {
 				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
@@ -161,7 +165,7 @@ func CommentsHandler(input Inputs) http.Handler {
 				sendStatusCode(w, quota, http.StatusBadRequest, "videoIdMissing")
 				return
 			}
-			var searches []Search
+			var searches []Filter
 			if r.Body != nil {
 				r.Body = http.MaxBytesReader(w, r.Body, 1048576) // Read max 1 MB
 				searchErr := json.NewDecoder(r.Body).Decode(&searches)
@@ -173,6 +177,8 @@ func CommentsHandler(input Inputs) http.Handler {
 					return
 				}
 			}
+
+			// Query hand handle pagination for youtube comment threads endpoint.
 			var commentsOutbound CommentOutbound
 			commentsOutbound.VideoId = id
 			var comments []interface{}
@@ -206,6 +212,8 @@ func CommentsHandler(input Inputs) http.Handler {
 					return
 				}
 			}
+
+			// Starts workers querying and handling pagination for all needed replies.
 			replyIds := make(chan string, len(needReplies))
 			for _, comId := range needReplies {
 				replyIds <- comId
@@ -233,6 +241,8 @@ func CommentsHandler(input Inputs) http.Handler {
 					return
 				}
 			}
+
+			// Filter comments and replies, and provide response.
 			ok, filteredComments := CommentFilter(searches, comments)
 			if !ok {
 				sendStatusCode(w, quota, http.StatusInternalServerError, "failedFilteringComments")
@@ -241,6 +251,7 @@ func CommentsHandler(input Inputs) http.Handler {
 			SortComments(&comments)
 			commentsOutbound.Comments = filteredComments
 			commentsOutbound.QuotaUsage = quota
+			w.Header().Set("Content-Type", "application/json")
 			err := json.NewEncoder(w).Encode(commentsOutbound)
 			if err != nil {
 				log.Println("Failed to respond to playlist endpoint.")
