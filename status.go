@@ -16,13 +16,9 @@ func StatusHandler(input Inputs) http.Handler {
 		switch r.Method {
 		case http.MethodGet:
 
-			// Check user input and fail if input is incorrect or missing.
+			// Check user input, this endpoint is allowed to progress even without a key.
 			var youtubeStatus StatusCodeOutbound
 			key := r.URL.Query().Get("key")
-			if key == "" {
-				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
-				return
-			}
 
 			// Query youtube to check for youtube API status.
 			uptime := time.Since(input.StartTime).Round(time.Second).Seconds()
