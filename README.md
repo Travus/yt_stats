@@ -22,7 +22,7 @@ This REST API takes YouTube API keys as a parameter, which means that multiple p
 ## Setup
 This repository comes with a Dockerfile in order to run it using Docker. If you do not have Docker already installed then you can follow [Docker's installation guide](https://docs.docker.com/docker-for-windows/install/) in order to install it.  
 Once you have Docker installed you can simply clone this repository and build a Docker image by navigating into the repository and running the following command:  
-`docker build -t yt_stats:v1`
+`docker build -t yt_stats:v1 .`
 > Note: yt_stats:v1 can be replaced with any other name you'd like to give the image.
 
 Once the docker image is created, you can start a docker instance of it with the following command:  
