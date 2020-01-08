@@ -13,6 +13,7 @@ import (
 
 const PlaylistIds = "PLbpi6ZahtOH7EUqtnmgJ3RFsej5UeFgxU%2CPLpjK416fmKwR-wFOaITVZ4Ktx2-mm2qp7"
 
+// Parses sample input and returns output. Outbound is tested in tests. Essentially tests different parser settings.
 func parseMockedPlaylist(t *testing.T, stats bool, videos bool) yt_stats.PlaylistOutbound {
 	var inbound yt_stats.PlaylistInbound
 	plVideos1 := make([]yt_stats.VideoInbound, 1)

@@ -11,6 +11,7 @@ import (
 	"yt_stats"
 )
 
+// Get a list of video IDs, and join them with commas.
 func getVideoIds(t *testing.T) string {
 	var videoIds []string
 	parseFile(t, "res/video_inbound.json", &videoIds)

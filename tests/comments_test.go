@@ -15,6 +15,7 @@ import (
 
 const videoId = "zqfZs3Z7vy8"
 
+// Required to convert sample data into the state it would otherwise be.
 func fromFileFixer(t *testing.T, f string) []interface{} {
 	var inbound []interface{}
 	read, err := os.Open(f)

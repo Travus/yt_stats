@@ -51,6 +51,7 @@ func getInputs() yt_stats.Inputs {
 	}
 }
 
+// Generalized test, testing output for URLs for missing key errors.
 func keyMissing(t *testing.T, f func(inputs yt_stats.Inputs) http.Handler, url string) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -68,6 +69,7 @@ func keyMissing(t *testing.T, f func(inputs yt_stats.Inputs) http.Handler, url s
 	}
 }
 
+// Generalized test, testing output for URLs for unsupported request type errors.
 func unsupportedRequestType(t *testing.T, f func(inputs yt_stats.Inputs) http.Handler, url string, rType string) {
 	req, err := http.NewRequest(rType, url, nil)
 	if err != nil {
