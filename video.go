@@ -27,7 +27,7 @@ func VideoHandler(input Inputs) http.Handler {
 			}
 			ids := r.URL.Query().Get("id")
 			if ids == "" {
-				sendStatusCode(w, quota, http.StatusBadRequest, "channelIdMissing")
+				sendStatusCode(w, quota, http.StatusBadRequest, "videoIdMissing")
 				return
 			}
 			if len(strings.Split(ids, ",")) > 50 {
