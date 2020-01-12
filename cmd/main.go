@@ -38,6 +38,8 @@ func main() {
 		PlaylistsRoot:     "https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&maxResults=50",
 		PlaylistItemsRoot: "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50",
 		VideosRoot:        "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&maxResults=50",
+		StreamRoot:        "https://www.googleapis.com/youtube/v3/videos?part=id,liveStreamingDetails&maxResults=50",
+		ChatRoot:          "https://www.googleapis.com/youtube/v3/liveChat/messages?part=id,snippet,authorDetails&maxResults=2000",
 	}
 
 	// Set port to 8080 and start handlers.
@@ -48,6 +50,8 @@ func main() {
 	http.Handle("/ytstats/v1/playlist/", yt_stats.PlaylistHandler(inputs))
 	http.Handle("/ytstats/v1/video/", yt_stats.VideoHandler(inputs))
 	http.Handle("/ytstats/v1/comments/", yt_stats.CommentsHandler(inputs))
+	http.Handle("/ytstats/v1/stream/", yt_stats.StreamHandler(inputs))
+	http.Handle("/ytstats/v1/chat/", yt_stats.ChatHandler(inputs))
 
 	// Serve REST API.
 	err := http.ListenAndServe(":"+port, nil)

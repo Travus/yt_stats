@@ -282,3 +282,8 @@ func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
 		*comments = append(*comments, rep)
 	}
 }
+
+// Parses a StreamInbound struct into a StreamOutbound struct.
+func StreamParser(inbound StreamInbound) StreamOutbound {
+	return StreamOutbound{}
+}

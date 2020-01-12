@@ -13,6 +13,8 @@ type Inputs struct {
 	PlaylistsRoot     string
 	PlaylistItemsRoot string
 	VideosRoot        string
+	StreamRoot        string
+	ChatRoot          string
 }
 
 // Represents the JSON received from a YouTube error response.
@@ -325,4 +327,43 @@ type Filter struct {
 	Reductive     bool     `json:"reductive"`
 	Users         []string `json:"users"`
 	Content       []string `json:"content"`
+}
+
+// Represents the JSON received from the YouTube Video endpoint used for Streams endpoint.
+type StreamInbound struct {
+	Items []struct {
+		Id                   string `json:"id"`
+		LiveStreamingDetails struct {
+			ScheduledStartTime string `json:"scheduledStartTime"`
+			ActualStartTime    string `json:"actualStartTime"`
+			ActualEndTime      string `json:"actualEndTime"`
+			ConcurrentViewers  string `json:"concurrentViewers"`
+			ActiveLiveChatId   string `json:"activeLiveChatId"`
+		} `json:"liveStreamingDetails"`
+	} `json:"items"`
+}
+
+// Represents the JSON sent by the Streams endpoint.
+type StreamOutbound struct {
+	QuotaUsage int           `json:"quota_usage"`
+	Streams    []interface{} `json:"streams"`
+}
+
+// Represents the JSON for one ongoing stream, needs own struct to display non-omitted viewer count.
+type LiveStream struct {
+	Id                 string `json:"id"`
+	Status             string `json:"status"`
+	ScheduledStartTime string `json:"scheduled_start_time,omitempty"`
+	StartTime          string `json:"start_time"`
+	ConcurrentViewers  int    `json:"concurrent_viewers"`
+	ChatId             string `json:"chat_id,omitempty"`
+}
+
+// Represents the JSON for one not ongoing stream.
+type Stream struct {
+	Id                 string `json:"id"`
+	Status             string `json:"status"`
+	ScheduledStartTime string `json:"scheduled_start_time,omitempty"`
+	StartTime          string `json:"start_time,omitempty"`
+	EndTime            string `json:"end_time,omitempty"`
 }
