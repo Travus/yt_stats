@@ -285,5 +285,43 @@ func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
 
 // Parses a StreamInbound struct into a StreamOutbound struct.
 func StreamParser(inbound StreamInbound) StreamOutbound {
-	return StreamOutbound{}
+	var outbound StreamOutbound
+	outbound.Streams = make([]interface{}, len(inbound.Items))
+	for i, video := range inbound.Items {
+		if video.LiveStreamingDetails.ActualStartTime != "" && video.LiveStreamingDetails.ActualEndTime == "" {
+			viewers, err := strconv.Atoi(video.LiveStreamingDetails.ConcurrentViewers)
+			if err != nil {
+				viewers = -1
+				log.Printf("failed to convert concurrent viewers for %s", video.Id)
+			}
+			outbound.Streams[i] = LiveStream{
+				Id:                 video.Id,
+				Status:             "live",
+				ScheduledStartTime: video.LiveStreamingDetails.ScheduledStartTime,
+				StartTime:          video.LiveStreamingDetails.ActualStartTime,
+				ConcurrentViewers:  viewers,
+				ChatId:             video.LiveStreamingDetails.ActiveLiveChatId,
+			}
+		} else if video.LiveStreamingDetails.ActualEndTime != "" {
+			outbound.Streams[i] = Stream{
+				Id:                 video.Id,
+				Status:             "ended",
+				ScheduledStartTime: video.LiveStreamingDetails.ScheduledStartTime,
+				StartTime:          video.LiveStreamingDetails.ActualStartTime,
+				EndTime:            video.LiveStreamingDetails.ActualEndTime,
+			}
+		} else if video.LiveStreamingDetails.ScheduledStartTime != "" {
+			outbound.Streams[i] = Stream{
+				Id:                 video.Id,
+				Status:             "scheduled",
+				ScheduledStartTime: video.LiveStreamingDetails.ScheduledStartTime,
+			}
+		} else {
+			outbound.Streams[i] = Stream{
+				Id:                 video.Id,
+				Status:             "video",
+			}
+		}
+	}
+	return outbound
 }
