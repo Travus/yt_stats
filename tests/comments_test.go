@@ -16,7 +16,7 @@ import (
 const videoId = "zqfZs3Z7vy8"
 
 // Required to convert sample data into the state it would otherwise be.
-func fromFileFixer(t *testing.T, f string) []interface{} {
+func fromFileFixerComments(t *testing.T, f string) []interface{} {
 	var inbound []interface{}
 	read, err := os.Open(f)
 	if err != nil {
@@ -71,7 +71,7 @@ func TestCommentsParser(t *testing.T) {
 	var outbound []interface{}
 	var replies []string
 	parseFile(t, "res/commentthreads_inbound.json", &inbound)
-	expected = fromFileFixer(t, "res/commentthreads_outbound.json")
+	expected = fromFileFixerComments(t, "res/commentthreads_outbound.json")
 	yt_stats.CommentsParser(inbound, &outbound, &replies)
 	yt_stats.SortComments(&outbound)
 	if reflect.DeepEqual(outbound, []yt_stats.Comment{}) {
@@ -90,7 +90,7 @@ func TestRepliesParser(t *testing.T) {
 	var expected []interface{}
 	var outbound []interface{}
 	parseFile(t, "res/comments_inbound.json", &inbound)
-	expected = fromFileFixer(t, "res/comments_outbound.json")
+	expected = fromFileFixerComments(t, "res/comments_outbound.json")
 	yt_stats.RepliesParser(inbound, &outbound)
 	yt_stats.SortComments(&outbound)
 	if reflect.DeepEqual(outbound, []yt_stats.Comment{}) {
@@ -105,7 +105,7 @@ func TestCommentSearch(t *testing.T) {
 	var testData []interface{}
 	var results []interface{}
 	var filters []yt_stats.Filter
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_1.json", &filters)
 	worked, results := yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -116,7 +116,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_2.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -127,7 +127,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_3.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -138,7 +138,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_4.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -149,7 +149,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_5.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {

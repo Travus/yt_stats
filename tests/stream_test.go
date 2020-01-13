@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -13,11 +14,66 @@ import (
 
 const streamId = "Qj9Ck1c3Zg0"
 
+// Required to convert sample data into the state it would otherwise be.
+func fromFileFixerStream(t *testing.T, f string) yt_stats.StreamOutbound {
+	var outbound yt_stats.StreamOutbound
+	var inbound []interface{}
+	read, err := os.Open(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = json.NewDecoder(read).Decode(&inbound)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = read.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	outbound.Streams = make([]interface{}, len(inbound))
+	for i, rawEntry := range inbound {
+		if entry, ok := rawEntry.(map[string]interface{}); ok {
+			if entry["status"] == "live" {
+				outbound.Streams[i] = yt_stats.LiveStream{
+					Id:                 entry["id"].(string),
+					Status:             "live",
+					ScheduledStartTime: entry["scheduled_start_time"].(string),
+					StartTime:          entry["start_time"].(string),
+					ConcurrentViewers:  int(entry["concurrent_viewers"].(float64)),
+					ChatId:             entry["chat_id"].(string),
+				}
+			} else if entry["status"] == "ended" {
+				outbound.Streams[i] = yt_stats.Stream{
+					Id:                 entry["id"].(string),
+					Status:             "ended",
+					ScheduledStartTime: entry["scheduled_start_time"].(string),
+					StartTime:          entry["start_time"].(string),
+					EndTime:            entry["end_time"].(string),
+				}
+			} else if entry["status"] == "scheduled" {
+				outbound.Streams[i] = yt_stats.Stream{
+					Id:                 entry["id"].(string),
+					Status:             "scheduled",
+					ScheduledStartTime: entry["scheduled_start_time"].(string),
+				}
+			} else if entry["status"] == "video" {
+				outbound.Streams[i] = yt_stats.Stream{
+					Id:     entry["id"].(string),
+					Status: "video",
+				}
+			} else {
+				outbound.Streams[i] = nil
+			}
+		}
+	}
+	return outbound
+}
+
 func TestStreamParser(t *testing.T) {
 	var inbound yt_stats.StreamInbound
 	var expected yt_stats.StreamOutbound
 	parseFile(t, "res/stream_inbound.json", &inbound)
-	parseFile(t, "res/stream_outbound.json", &expected)
+	expected = fromFileFixerStream(t, "res/stream_outbound.json")
 	outbound := yt_stats.StreamParser(inbound)
 	if reflect.DeepEqual(outbound, yt_stats.StreamOutbound{}) {
 		t.Error("function returned empty struct")
