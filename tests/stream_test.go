@@ -163,5 +163,5 @@ func TestStreamHandlerSuccess(t *testing.T) {
 }
 
 func TestStreamHandlerUnsupportedType(t *testing.T) {
-	unsupportedRequestType(t, yt_stats.VideoHandler, "/ytstats/v1/stream/", "PUT")
+	unsupportedRequestType(t, yt_stats.StreamHandler, "/ytstats/v1/stream/", "PUT")
 }
