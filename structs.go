@@ -495,7 +495,7 @@ type ChatSuperSticker struct {
 }
 
 // Represents the JSON for chat message. Part of ChatOutbound.
-type ChatTextMessage struct {
+type ChatMessage struct {
 	Id          string   `json:"id"`
 	Type        string   `json:"type"`
 	PublishedAt string   `json:"published_at"`
@@ -512,11 +512,11 @@ type ChatTombstone struct {
 
 // Represents the JSON for a chat user getting banned. Part of ChatOutbound.
 type ChatUserBanned struct {
-	Id          string `json:"id"`
-	Type        string `json:"type"`
-	PublishedAt string `json:"published_at"`
-	BanType string `json:"ban_type"`
-	BanDuration int `json:"ban_duration,omitempty"`
-	BannedUser ChatUser `json:"banned_user"`
-	BannedBy ChatUser `json:"banned_by"`
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	BanType     string   `json:"ban_type"`
+	BanDuration int      `json:"ban_duration,omitempty"`
+	BannedUser  ChatUser `json:"banned_user"`
+	BannedBy    ChatUser `json:"banned_by"`
 }
