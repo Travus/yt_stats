@@ -325,3 +325,15 @@ func StreamParser(inbound StreamInbound) StreamOutbound {
 	}
 	return outbound
 }
+
+// Parses a ChatInbound struct into a ChatOutbound struct.
+func ChatParser(inbound ChatInbound) ChatOutbound {
+	var outbound ChatOutbound
+	// ToDo: Transfer static variables to outbound variable
+	for _, event := range inbound.Items {
+		switch event.Snippet.Type {
+			// ToDo: Convert and add all chat items to outbound.ChatEvents
+		}
+	}
+	return outbound
+}

@@ -367,3 +367,156 @@ type Stream struct {
 	StartTime          string `json:"start_time,omitempty"`
 	EndTime            string `json:"end_time,omitempty"`
 }
+
+// Represents the JSON received from the YouTube liveChatMessages endpoint.
+type ChatInbound struct {
+	NextPageToken         string `json:"nextPageToken"`
+	PollingIntervalMillis int    `json:"pollingIntervalMillis"`
+	Items                 []struct {
+		Id      string `json:"id"`
+		Snippet struct {
+			Type                  string `json:"type"`
+			AuthorChannelId       string `json:"authorChannelId"`
+			PublishedAt           string `json:"publishedAt"`
+			DisplayMessage        string `json:"displayMessage"`
+			MessageDeletedDetails struct {
+				DeletedMessageId string `json:"deletedMessageId"`
+			} `json:"messageDeletedDetails"`
+			UserBannedDetails struct {
+				BannedUserDetails struct {
+					ChannelId   string `json:"channelId"`
+					ChannelUrl  string `json:"channelUrl"`
+					DisplayName string `json:"displayName"`
+				} `json:"bannedUserDetails"`
+				BanType            string `json:"banType"`
+				BanDurationSeconds int    `json:"banDurationSeconds"`
+			} `json:"userBannedDetails"`
+			SuperChatDetails struct {
+				AmountMicros int    `json:"amountMicros"`
+				Currency     string `json:"currency"`
+				UserComment  string `json:"userComment"`
+			} `json:"superChatDetails"`
+			SuperStickerDetails struct {
+				SuperStickerMetadata struct {
+					StickerId string `json:"stickerId"`
+					AltText   string `json:"altText"`
+				} `json:"superStickerMetadata"`
+				AmountMicros int    `json:"amountMicros"`
+				Currency     string `json:"currency"`
+			} `json:"superStickerDetails"`
+		} `json:"snippet"`
+		AuthorDetails struct {
+			ChannelId       string `json:"channelId"`
+			ChannelUrl      string `json:"channelUrl"`
+			DisplayName     string `json:"displayName"`
+			IsVerified      bool   `json:"isVerified"`
+			IsChatOwner     bool   `json:"isChatOwner"`
+			IsChatSponsor   bool   `json:"isChatSponsor"`
+			IsChatModerator bool   `json:"isChatModerator"`
+		} `json:"authorDetails"`
+	} `json:"items"`
+}
+
+// Represents the JSON sent by the Chat endpoint.
+type ChatOutbound struct {
+	QuotaUsage        int           `json:"quota_usage"`
+	ChatId            string        `json:"chat_id"`
+	PageToken         string        `json:"page_token"`
+	SuggestedCooldown int           `json:"suggested_cooldown"`
+	ChatEvents        []interface{} `json:"chat_events"`
+}
+
+// Represents the JSON for a user in chat. Part of chat events.
+type ChatUser struct {
+	AuthorName       string `json:"author_name"`
+	AuthorId         string `json:"author_id"`
+	AuthorChannelUrl string `json:"author_channel_url"`
+	ChatOwner        bool   `json:"chat_owner"`
+	Moderator        bool   `json:"moderator"`
+	Sponsor          bool   `json:"sponsor"`
+	Verified         bool   `json:"verified"`
+}
+
+// Represents the JSON for a chat message being deleted. Part of ChatOutbound.
+type ChatMessageDeleted struct {
+	Id             string   `json:"id"`
+	Type           string   `json:"type"`
+	PublishedAt    string   `json:"published_at"`
+	DeletedMessage string   `json:"deleted_message"`
+	DeletedBy      ChatUser `json:"deleted_by"`
+}
+
+// Represents the JSON for a new sponsor or sponsor change. Part of ChatOutbound.
+type ChatNewSponsor struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	NewSponsor  ChatUser `json:"new_sponsor"`
+}
+
+// Represents the JSON for a chat stopping sponsor only mode. Part of ChatOutbound.
+type ChatSponsorOnlyModeEnded struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	EndedBy     ChatUser `json:"ended_by"`
+}
+
+// Represents the JSON for a chat starting sponsor only mode. Part of ChatOutbound.
+type ChatSponsorOnlyModeStarted struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	StartedBy   ChatUser `json:"started_by"`
+}
+
+// Represents the JSON for a super chat. Part of ChatOutbound.
+type ChatSuperChat struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	Amount      float64  `json:"amount"`
+	Currency    string   `json:"currency"`
+	SentBy      ChatUser `json:"sent_by"`
+}
+
+// Represents the JSON for a super sticker. Part of ChatOutbound.
+type ChatSuperSticker struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Amount      float64  `json:"amount"`
+	Currency    string   `json:"currency"`
+	StickerId   string   `json:"sticker_id"`
+	AltText     string   `json:"alt_text"`
+	SentBy      ChatUser `json:"sent_by"`
+}
+
+// Represents the JSON for chat message. Part of ChatOutbound.
+type ChatTextMessage struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	Author      ChatUser `json:"author"`
+}
+
+// Represents the JSON for a removed chat message. Part of ChatOutbound.
+type ChatTombstone struct {
+	Id          string `json:"id"`
+	Type        string `json:"type"`
+	PublishedAt string `json:"published_at"`
+}
+
+// Represents the JSON for a chat user getting banned. Part of ChatOutbound.
+type ChatUserBanned struct {
+	Id          string `json:"id"`
+	Type        string `json:"type"`
+	PublishedAt string `json:"published_at"`
+	BanType string `json:"ban_type"`
+	BanDuration int `json:"ban_duration,omitempty"`
+	BannedUser ChatUser `json:"banned_user"`
+	BannedBy ChatUser `json:"banned_by"`
+}
