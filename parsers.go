@@ -327,12 +327,168 @@ func StreamParser(inbound StreamInbound) StreamOutbound {
 }
 
 // Parses a ChatInbound struct into a ChatOutbound struct.
-func ChatParser(inbound ChatInbound) ChatOutbound {
+func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 	var outbound ChatOutbound
-	// ToDo: Transfer static variables to outbound variable
-	for _, event := range inbound.Items {
+	outbound.ChatId = chatId
+	outbound.NextPageToken = inbound.NextPageToken
+	outbound.SuggestedCooldown = inbound.PollingIntervalMillis
+	outbound.ChatEvents = make([]interface{}, len(inbound.Items))
+	for i, event := range inbound.Items {
 		switch event.Snippet.Type {
-			// ToDo: Convert and add all chat items to outbound.ChatEvents
+		case "chatEndedEvent":
+			outbound.ChatEvents[i] = ChatEnded{
+				Id:          event.Id,
+				Type:        "chat_ended",
+				PublishedAt: event.Snippet.PublishedAt,
+			}
+		case "messageDeletedEvent":
+			outbound.ChatEvents[i] = ChatMessageDeleted{
+				Id:             event.Id,
+				Type:           "message_deleted",
+				PublishedAt:    event.Snippet.PublishedAt,
+				DeletedMessage: event.Snippet.MessageDeletedDetails.DeletedMessageId,
+				DeletedBy:      ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "newSponsorEvent":
+			outbound.ChatEvents[i] = ChatNewSponsor{
+				Id:          event.Id,
+				Type:        "sponsor",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.DisplayMessage,
+				NewSponsor:  ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "sponsorOnlyModeEndedEvent":
+			outbound.ChatEvents[i] = ChatSponsorOnlyModeEnded{
+				Id:          event.Id,
+				Type:        "sponsor_only_off",
+				PublishedAt: event.Snippet.PublishedAt,
+				EndedBy:     ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "sponsorOnlyModeStartedEvent":
+			outbound.ChatEvents[i] = ChatSponsorOnlyModeStarted{
+				Id:          event.Id,
+				Type:        "sponsor_only_on",
+				PublishedAt: event.Snippet.PublishedAt,
+				StartedBy:   ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "superChatEvent":
+			outbound.ChatEvents[i] = ChatSuperChat{
+				Id:          event.Id,
+				Type:        "superchat",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.SuperChatDetails.UserComment,
+				Amount:      float64(event.Snippet.SuperChatDetails.AmountMicros) / 100000,
+				Currency:    event.Snippet.SuperChatDetails.Currency,
+				SentBy:      ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "superStickerEvent":
+			outbound.ChatEvents[i] = ChatSuperSticker{
+				Id:          event.Id,
+				Type:        "supersticker",
+				PublishedAt: event.Snippet.PublishedAt,
+				Amount:      float64(event.Snippet.SuperStickerDetails.AmountMicros) / 100000,
+				Currency:    event.Snippet.SuperStickerDetails.Currency,
+				StickerId:   event.Snippet.SuperStickerDetails.SuperStickerMetadata.StickerId,
+				AltText:     event.Snippet.SuperStickerDetails.SuperStickerMetadata.AltText,
+				SentBy:      ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "textMessageEvent":
+			outbound.ChatEvents[i] = ChatMessage{
+				Id:          event.Id,
+				Type:        "message",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.DisplayMessage,
+				Author:      ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "tombstone":
+			outbound.ChatEvents[i] = ChatTombstone{
+				Id:          event.Id,
+				Type:        "tombstone",
+				PublishedAt: event.Snippet.PublishedAt,
+			}
+		case "userBannedEvent":
+			outbound.ChatEvents[i] = ChatUserBanned{
+				Id:          event.Id,
+				Type:        "ban",
+				PublishedAt: event.Snippet.PublishedAt,
+				BanType:     event.Snippet.UserBannedDetails.BanType,
+				BanDuration: event.Snippet.UserBannedDetails.BanDurationSeconds,
+				BannedUser:  ChatUser{
+					AuthorName:       event.Snippet.UserBannedDetails.BannedUserDetails.DisplayName,
+					AuthorId:         event.Snippet.UserBannedDetails.BannedUserDetails.ChannelId,
+					AuthorChannelUrl: event.Snippet.UserBannedDetails.BannedUserDetails.ChannelUrl,
+				},
+				BannedBy:    ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		default:
+			outbound.ChatEvents[i] = ChatUnknownEvent{
+				Type:  "unknown",
+				Event: event,
+			}
 		}
 	}
 	return outbound

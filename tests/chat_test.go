@@ -105,7 +105,7 @@ func TestChatParser(t *testing.T) {
 	var expected yt_stats.ChatOutbound
 	parseFile(t, "res/chat_inbound.json", &inbound)
 	expected = fromFileFixerChat(t, "res/chat_outbound.json")
-	outbound := yt_stats.ChatParser(inbound)
+	outbound := yt_stats.ChatParser(inbound, chatId)
 	if reflect.DeepEqual(outbound, yt_stats.ChatOutbound{}) {
 		t.Error("function returned empty struct")
 	}

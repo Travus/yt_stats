@@ -421,7 +421,7 @@ type ChatInbound struct {
 type ChatOutbound struct {
 	QuotaUsage        int           `json:"quota_usage"`
 	ChatId            string        `json:"chat_id"`
-	PageToken         string        `json:"page_token"`
+	NextPageToken     string        `json:"page_token"`
 	SuggestedCooldown int           `json:"suggested_cooldown"`
 	ChatEvents        []interface{} `json:"chat_events"`
 }
@@ -431,10 +431,17 @@ type ChatUser struct {
 	AuthorName       string `json:"author_name"`
 	AuthorId         string `json:"author_id"`
 	AuthorChannelUrl string `json:"author_channel_url"`
-	ChatOwner        bool   `json:"chat_owner"`
-	Moderator        bool   `json:"moderator"`
-	Sponsor          bool   `json:"sponsor"`
-	Verified         bool   `json:"verified"`
+	ChatOwner        bool   `json:"chat_owner,omitempty"`
+	Moderator        bool   `json:"moderator,omitempty"`
+	Sponsor          bool   `json:"sponsor,omitempty"`
+	Verified         bool   `json:"verified,omitempty"`
+}
+
+// Represents the JSON for the chat ending. Part of ChatOutbound.
+type ChatEnded struct {
+	Id          string `json:"id"`
+	Type        string `json:"type"`
+	PublishedAt string `json:"published_at"`
 }
 
 // Represents the JSON for a chat message being deleted. Part of ChatOutbound.
@@ -519,4 +526,9 @@ type ChatUserBanned struct {
 	BanDuration int      `json:"ban_duration,omitempty"`
 	BannedUser  ChatUser `json:"banned_user"`
 	BannedBy    ChatUser `json:"banned_by"`
+}
+
+type ChatUnknownEvent struct {
+	Type  string      `json:"type"`
+	Event interface{} `json:"event"`
 }
