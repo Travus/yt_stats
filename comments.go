@@ -199,7 +199,7 @@ func CommentsHandler(input Inputs) http.Handler {
 					quota += 5
 					youtubeStatus = ErrorParser(resp.Body, &commentsInbound)
 					if youtubeStatus.StatusCode != http.StatusOK {
-						if youtubeStatus.StatusMessage == "keyInvalid" {  // Quota cannot be deducted from invalid keys.
+						if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
 							quota -= 5
 						}
 						sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)

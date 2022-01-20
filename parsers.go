@@ -23,6 +23,18 @@ func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 		}
 	}
 	if errorCode.Error.Code != 0 {
+		if strings.Contains(errorCode.Error.Message, "missing a valid API key") {
+			return StatusCodeOutbound{
+				StatusCode:    errorCode.Error.Code,
+				StatusMessage: "keyMissing",
+			}
+		}
+		if strings.Contains(errorCode.Error.Message, "API key not valid.") {
+			return StatusCodeOutbound{
+				StatusCode:    errorCode.Error.Code,
+				StatusMessage: "keyInvalid",
+			}
+		}
 		if errorCode.Error.Errors[0].Reason == "" {
 			return StatusCodeOutbound{
 				StatusCode:    errorCode.Error.Code,
