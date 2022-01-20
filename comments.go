@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-// Sorts the comments slice based on comment and reply publishing time.
+// SortComments sorts the comments slice based on comment and reply publishing time.
 func SortComments(comments *[]interface{}) {
 	sortFunc := func(i int, j int) bool {
 		switch com1 := (*comments)[i].(type) {
@@ -55,7 +55,7 @@ func searchContent(substrings []string, message string, caseSensitive bool) (boo
 	return any, all
 }
 
-// The logic used to filter through comments and replies based on multiple searches.
+// CommentFilter houses the logic used to filter through comments and replies based on multiple searches.
 // Returns a bool on if the filtering succeeded, and the result. Cannot check for nil result since empty results exist.
 func CommentFilter(searches []Filter, comments []interface{}) (bool, []interface{}) {
 	if searches == nil {
@@ -66,10 +66,10 @@ func CommentFilter(searches []Filter, comments []interface{}) (bool, []interface
 	for _, search := range searches {
 		var match []interface{}
 		var remains []interface{}
-		if search.Reductive {  // Reductive filter, all non-matches stay.
+		if search.Reductive { // Reductive filter, all non-matches stay.
 			source = matches
 			remains = comments
-		} else {  // Additive filter, all matches stay.
+		} else { // Additive filter, all matches stay.
 			source = comments
 			match = matches
 		}
@@ -120,7 +120,7 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 					}
 				}
 				defer resp.Body.Close()
-				quota += 2  // Snippet cost for this endpoint is 1 less than everywhere else.
+				quota += 2 // Snippet cost for this endpoint is 1 less than everywhere else.
 				youtubeStatus = ErrorParser(resp.Body, &repliesInbound)
 				if youtubeStatus.StatusCode != http.StatusOK {
 					return youtubeStatus
@@ -133,7 +133,8 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 			}
 			if ret := ok(); ret.StatusCode != http.StatusOK {
 				r <- ret
-				for range in {} // Encountered an error, drain channel to save quota.
+				for range in {
+				} // Encountered an error, drain channel to save quota.
 				return quota
 			}
 		}
@@ -145,7 +146,7 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 	return quota
 }
 
-// Handler for the comments endpoint. /ytstats/v1/comments/
+// CommentsHandler is the handler for the comments endpoint. /ytstats/v1/comments/
 // Provides a list of all comments and replies of a video. Can be extensively filtered via filters in request body.
 func CommentsHandler(input Inputs) http.Handler {
 	workers := 10
@@ -224,7 +225,7 @@ func CommentsHandler(input Inputs) http.Handler {
 			var add sync.Mutex
 			workerResponses := make(chan StatusCodeOutbound, workers)
 			wg.Add(workers)
-			for i := 0; i < workers; i++ {  // Launch workers.
+			for i := 0; i < workers; i++ { // Launch workers.
 				go func() {
 					n := worker(replyIds, &comments, workerResponses, &mut, input, key)
 					add.Lock()

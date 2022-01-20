@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Handler for the channel endpoint. /ytstats/v1/channel/
+// ChannelHandler is the handler for the channel endpoint. /ytstats/v1/channel/
 // Provides statistics for up to 50 channels.
 func ChannelHandler(input Inputs) http.Handler {
 	channel := func(w http.ResponseWriter, r *http.Request) {

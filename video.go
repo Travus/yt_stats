@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Handler for the video endpoint. /ytstats/v1/video/
+// VideoHandler is the handler for the video endpoint. /ytstats/v1/video/
 // Provides info of up to 50 videos, and statistics of them.
 func VideoHandler(input Inputs) http.Handler {
 	video := func(w http.ResponseWriter, r *http.Request) {

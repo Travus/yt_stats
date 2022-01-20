@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Handler for the playlist endpoint. /ytstats/v1/playlist/
+// PlaylistHandler is the handler for the playlist endpoint. /ytstats/v1/playlist/
 // Provides information on one or more playlists, and optionally a list of video and statistics on them.
 func PlaylistHandler(input Inputs) http.Handler {
 	playlist := func(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +80,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 				var playlistItemsInbound []PlaylistItemsInbound
 				for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
 					var playlistItemPageInbound PlaylistItemsInbound
-					ok := func() bool {  // Internal function for deferring the closing of response bodies inside loop.
+					ok := func() bool { // Internal function for deferring the closing of response bodies inside loop.
 						resp, err = http.Get(fmt.Sprintf("%s&playlistId=%s&key=%s&pageToken=%s",
 							input.PlaylistItemsRoot, plOutbound.Playlists[i].Id, key, pageToken))
 						if err != nil {

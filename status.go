@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Handler for the status endpoint. /ytstats/v1/status/
+// StatusHandler is the handler for the status endpoint. /ytstats/v1/status/
 // Provides version, uptime, and the status of the youtube API.
 func StatusHandler(input Inputs) http.Handler {
 	stats := func(w http.ResponseWriter, r *http.Request) {

@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// Parses a youtube response into a given struct, and returns a status code struct with OK or response.
+// ErrorParser parses a youtube response into a given struct, and returns a status code struct with OK or response.
 func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 	var buf bytes.Buffer
 	tee := io.TeeReader(r, &buf)
@@ -49,7 +49,7 @@ func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 	}
 }
 
-// Parses a ChannelInbound struct to a ChannelOutbound struct.
+// ChannelParser parses a ChannelInbound struct to a ChannelOutbound struct.
 func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 	var outbound ChannelOutbound
 	outbound.Channels = make([]Channel, len(inbound.Items))
@@ -85,7 +85,7 @@ func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 	return outbound
 }
 
-// Parses a PlaylistInbound struct to a PlaylistOutbound struct.
+// PlaylistTopLevelParser parses a PlaylistInbound struct to a PlaylistOutbound struct.
 func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 	var outbound PlaylistOutbound
 	outbound.Playlists = make([]Playlist, len(inbound.Items))
@@ -102,7 +102,7 @@ func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 	return outbound
 }
 
-// Parses a slice of PlaylistItemInbound structs to a slice of string slices including all the video IDs.
+// PlaylistItemsParser parses a slice of PlaylistItemInbound structs to a slice of string slices including all the video IDs.
 func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
 	var outbound [][]string
 	for _, inboundPlItems := range inbound {
@@ -115,7 +115,7 @@ func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
 	return outbound
 }
 
-// Parses a slice of VideoInbound structs into a Playlist struct and returns any errors.
+// VideoParser parses a slice of VideoInbound structs into a Playlist struct and returns any errors.
 func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) error {
 	var vStats VideoStats
 	totalViews, totalLikes, totalDislikes, totalComments := 0, 0, 0, 0
@@ -229,7 +229,7 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 	return nil
 }
 
-// Parses a CommentsInbound struct into a slice of interfaces containing Comment and Reply structs.
+// CommentsParser parses a CommentsInbound struct into a slice of interfaces containing Comment and Reply structs.
 func CommentsParser(inbound CommentsInbound, comments *[]interface{}, replies *[]string) {
 	for _, item := range inbound.Items {
 		com := Comment{
@@ -265,7 +265,7 @@ func CommentsParser(inbound CommentsInbound, comments *[]interface{}, replies *[
 	}
 }
 
-// Parses a RepliesInbound struct into a slice of interfaces containing Comment and Reply structs.
+// RepliesParser parses a RepliesInbound struct into a slice of interfaces containing Comment and Reply structs.
 func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
 	for _, item := range inbound.Items {
 		rep := Reply{
@@ -283,7 +283,7 @@ func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
 	}
 }
 
-// Parses a StreamInbound struct into a StreamOutbound struct.
+// StreamParser parses a StreamInbound struct into a StreamOutbound struct.
 func StreamParser(inbound StreamInbound) StreamOutbound {
 	var outbound StreamOutbound
 	outbound.Streams = make([]interface{}, len(inbound.Items))
@@ -318,15 +318,15 @@ func StreamParser(inbound StreamInbound) StreamOutbound {
 			}
 		} else {
 			outbound.Streams[i] = Stream{
-				Id:                 video.Id,
-				Status:             "video",
+				Id:     video.Id,
+				Status: "video",
 			}
 		}
 	}
 	return outbound
 }
 
-// Parses a ChatInbound struct into a ChatOutbound struct.
+// ChatParser parses a ChatInbound struct into a ChatOutbound struct.
 func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 	var outbound ChatOutbound
 	outbound.ChatId = chatId
@@ -347,7 +347,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				Type:           "message_deleted",
 				PublishedAt:    event.Snippet.PublishedAt,
 				DeletedMessage: event.Snippet.MessageDeletedDetails.DeletedMessageId,
-				DeletedBy:      ChatUser{
+				DeletedBy: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
@@ -363,7 +363,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				Type:        "sponsor",
 				PublishedAt: event.Snippet.PublishedAt,
 				Message:     event.Snippet.DisplayMessage,
-				NewSponsor:  ChatUser{
+				NewSponsor: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
@@ -378,7 +378,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				Id:          event.Id,
 				Type:        "sponsor_only_off",
 				PublishedAt: event.Snippet.PublishedAt,
-				EndedBy:     ChatUser{
+				EndedBy: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
@@ -393,7 +393,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				Id:          event.Id,
 				Type:        "sponsor_only_on",
 				PublishedAt: event.Snippet.PublishedAt,
-				StartedBy:   ChatUser{
+				StartedBy: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
@@ -446,7 +446,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				Type:        "message",
 				PublishedAt: event.Snippet.PublishedAt,
 				Message:     event.Snippet.DisplayMessage,
-				Author:      ChatUser{
+				Author: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
@@ -469,12 +469,12 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				PublishedAt: event.Snippet.PublishedAt,
 				BanType:     event.Snippet.UserBannedDetails.BanType,
 				BanDuration: event.Snippet.UserBannedDetails.BanDurationSeconds,
-				BannedUser:  ChatUser{
+				BannedUser: ChatUser{
 					AuthorName:       event.Snippet.UserBannedDetails.BannedUserDetails.DisplayName,
 					AuthorId:         event.Snippet.UserBannedDetails.BannedUserDetails.ChannelId,
 					AuthorChannelUrl: event.Snippet.UserBannedDetails.BannedUserDetails.ChannelUrl,
 				},
-				BannedBy:    ChatUser{
+				BannedBy: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,

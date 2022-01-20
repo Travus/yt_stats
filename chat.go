@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Handler for the chat endpoint. /ytstats/v1/chat/
+// ChatHandler is the handler for the chat endpoint. /ytstats/v1/chat/
 // Lists messages of ongoing live streams. Only works on currently active streams.
 func ChatHandler(input Inputs) http.Handler {
 	stats := func(w http.ResponseWriter, r *http.Request) {
@@ -19,4 +19,3 @@ func ChatHandler(input Inputs) http.Handler {
 	}
 	return http.HandlerFunc(stats)
 }
-

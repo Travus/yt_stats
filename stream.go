@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Handler for the stream endpoint. /ytstats/v1/stream/
+// StreamHandler is the handler for the stream endpoint. /ytstats/v1/stream/
 // Provides status and information on live streams such as start time, and if currently online concurrent viewers.
 func StreamHandler(input Inputs) http.Handler {
 	stats := func(w http.ResponseWriter, r *http.Request) {
