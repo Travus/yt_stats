@@ -130,7 +130,7 @@ func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
 // VideoParser parses a slice of VideoInbound structs into a Playlist struct and returns any errors.
 func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) error {
 	var vStats VideoStats
-	totalViews, totalLikes, totalDislikes, totalComments := 0, 0, 0, 0
+	totalViews, totalLikes, totalComments := 0, 0, 0
 	for _, videoInbound := range inbound {
 
 		// Handle overall statistics, like total duration etc.
@@ -149,11 +149,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 				return err
 			}
 			totalLikes += likes
-			dislikes, err := strconv.Atoi(video.Statistics.DislikeCount)
-			if err != nil {
-				return err
-			}
-			totalDislikes += dislikes
 			comments, err := strconv.Atoi(video.Statistics.CommentCount)
 			if err != nil {
 				return err
@@ -172,7 +167,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 					Duration:     dur,
 					ViewCount:    views,
 					LikeCount:    likes,
-					DislikeCount: dislikes,
 					CommentCount: comments,
 				}
 				playlistObject.Videos = append(playlistObject.Videos, vid)
@@ -207,14 +201,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 					vStats.LeastLikedVideo = video.Id
 					vStats.LeastLikes = likes
 				}
-				if dislikes > vStats.MostDislikes || vStats.MostDislikedVideo == "" {
-					vStats.MostDislikedVideo = video.Id
-					vStats.MostDislikes = dislikes
-				}
-				if dislikes < vStats.LeastDislikes || vStats.LeastDislikedVideo == "" {
-					vStats.LeastDislikedVideo = video.Id
-					vStats.LeastDislikes = dislikes
-				}
 				if comments > vStats.MostComments || vStats.MostCommentedVideo == "" {
 					vStats.MostCommentedVideo = video.Id
 					vStats.MostComments = comments
@@ -232,7 +218,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 		vStats.AverageVideoDuration = vStats.TotalLength / vStats.AvailableVideos
 		vStats.AverageViews = vStats.TotalViews / vStats.AvailableVideos
 		vStats.AverageLikes = totalLikes / vStats.AvailableVideos
-		vStats.AverageDislikes = totalDislikes / vStats.AvailableVideos
 		vStats.AverageComments = totalComments / vStats.AvailableVideos
 		playlistObject.VideoStats = &vStats
 	} else {

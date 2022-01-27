@@ -149,7 +149,6 @@ type VideoInbound struct {
 		Statistics struct {
 			ViewCount    string `json:"viewCount"`
 			LikeCount    string `json:"likeCount"`
-			DislikeCount string `json:"dislikeCount"`
 			CommentCount string `json:"commentCount"`
 		} `json:"statistics"`
 	} `json:"items"`
@@ -175,11 +174,6 @@ type VideoStats struct {
 	LeastLikedVideo       string `json:"least_liked_video"`
 	LeastLikes            int    `json:"least_likes"`
 	AverageLikes          int    `json:"average_likes"`
-	MostDislikedVideo     string `json:"most_disliked_video"`
-	MostDislikes          int    `json:"most_dislikes"`
-	LeastDislikedVideo    string `json:"least_disliked_video"`
-	LeastDislikes         int    `json:"least_dislikes"`
-	AverageDislikes       int    `json:"average_dislikes"`
 	MostCommentedVideo    string `json:"most_commented_video"`
 	MostComments          int    `json:"most_comments"`
 	LeastCommentedVideo   string `json:"least_commented_video"`
@@ -198,7 +192,6 @@ type Video struct {
 	Duration     int    `json:"duration"`
 	ViewCount    int    `json:"view_count"`
 	LikeCount    int    `json:"like_count"`
-	DislikeCount int    `json:"dislike_count"`
 	CommentCount int    `json:"comment_count"`
 }
 
