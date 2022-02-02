@@ -385,7 +385,7 @@ type ChatInbound struct {
 				BanDurationSeconds int    `json:"banDurationSeconds"`
 			} `json:"userBannedDetails"`
 			SuperChatDetails struct {
-				AmountMicros int    `json:"amountMicros"`
+				AmountMicros string `json:"amountMicros"`
 				Currency     string `json:"currency"`
 				UserComment  string `json:"userComment"`
 			} `json:"superChatDetails"`
@@ -394,9 +394,18 @@ type ChatInbound struct {
 					StickerId string `json:"stickerId"`
 					AltText   string `json:"altText"`
 				} `json:"superStickerMetadata"`
-				AmountMicros int    `json:"amountMicros"`
+				AmountMicros string `json:"amountMicros"`
 				Currency     string `json:"currency"`
 			} `json:"superStickerDetails"`
+			NewSponsorDetails struct {
+				MemberLevelName string `json:"memberLevelName"`
+				IsUpgrade       bool   `json:"isUpgrade"`
+			}
+			MemberMilestoneChatDetails struct {
+				MemberLevelName string `json:"memberLevelName"`
+				MemberMonth     int    `json:"memberMonth"`
+				UserComment     string `json:"userComment"`
+			} `json:"memberMilestoneChatDetails"`
 		} `json:"snippet"`
 		AuthorDetails struct {
 			ChannelId       string `json:"channelId"`
@@ -452,7 +461,21 @@ type ChatNewSponsor struct {
 	Type        string   `json:"type"`
 	PublishedAt string   `json:"published_at"`
 	Message     string   `json:"message"`
+	Level       string   `json:"level"`
+	Upgrade     bool     `json:"upgrade"`
 	NewSponsor  ChatUser `json:"new_sponsor"`
+}
+
+// ChatMemberMilestone represents the JSON for a member announcing membership renewal. Part of ChatOutbound.
+type ChatMemberMilestone struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	UserComment string   `json:"user_comment"`
+	Level       string   `json:"level"`
+	Months      int      `json:"months"`
+	Member      ChatUser `json:"member"`
 }
 
 // ChatSponsorOnlyModeEnded represents the JSON for a chat stopping sponsor only mode. Part of ChatOutbound.

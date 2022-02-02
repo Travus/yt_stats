@@ -360,7 +360,28 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				Type:        "sponsor",
 				PublishedAt: event.Snippet.PublishedAt,
 				Message:     event.Snippet.DisplayMessage,
+				Level:       event.Snippet.NewSponsorDetails.MemberLevelName,
+				Upgrade:     event.Snippet.NewSponsorDetails.IsUpgrade,
 				NewSponsor: ChatUser{
+					AuthorName:       event.AuthorDetails.DisplayName,
+					AuthorId:         event.AuthorDetails.ChannelId,
+					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:        event.AuthorDetails.IsChatOwner,
+					Moderator:        event.AuthorDetails.IsChatModerator,
+					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Verified:         event.AuthorDetails.IsVerified,
+				},
+			}
+		case "memberMilestoneChatEvent":
+			outbound.ChatEvents[i] = ChatMemberMilestone{
+				Id:          event.Id,
+				Type:        "membership_milestone",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.DisplayMessage,
+				UserComment: event.Snippet.MemberMilestoneChatDetails.UserComment,
+				Level:       event.Snippet.MemberMilestoneChatDetails.MemberLevelName,
+				Months:      event.Snippet.MemberMilestoneChatDetails.MemberMonth,
+				Member: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
@@ -401,41 +422,47 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				},
 			}
 		case "superChatEvent":
-			outbound.ChatEvents[i] = ChatSuperChat{
-				Id:          event.Id,
-				Type:        "superchat",
-				PublishedAt: event.Snippet.PublishedAt,
-				Message:     event.Snippet.SuperChatDetails.UserComment,
-				Amount:      float64(event.Snippet.SuperChatDetails.AmountMicros) / 100000,
-				Currency:    event.Snippet.SuperChatDetails.Currency,
-				SentBy:      ChatUser{
-					AuthorName:       event.AuthorDetails.DisplayName,
-					AuthorId:         event.AuthorDetails.ChannelId,
-					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
-					ChatOwner:        event.AuthorDetails.IsChatOwner,
-					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
-					Verified:         event.AuthorDetails.IsVerified,
-				},
+			amountMicros, err := strconv.ParseFloat(event.Snippet.SuperChatDetails.AmountMicros, 64)
+			if err == nil {
+				outbound.ChatEvents[i] = ChatSuperChat{
+					Id:          event.Id,
+					Type:        "superchat",
+					PublishedAt: event.Snippet.PublishedAt,
+					Message:     event.Snippet.SuperChatDetails.UserComment,
+					Amount:      amountMicros / 1000000,
+					Currency:    event.Snippet.SuperChatDetails.Currency,
+					SentBy: ChatUser{
+						AuthorName:       event.AuthorDetails.DisplayName,
+						AuthorId:         event.AuthorDetails.ChannelId,
+						AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+						ChatOwner:        event.AuthorDetails.IsChatOwner,
+						Moderator:        event.AuthorDetails.IsChatModerator,
+						Sponsor:          event.AuthorDetails.IsChatSponsor,
+						Verified:         event.AuthorDetails.IsVerified,
+					},
+				}
 			}
 		case "superStickerEvent":
-			outbound.ChatEvents[i] = ChatSuperSticker{
-				Id:          event.Id,
-				Type:        "supersticker",
-				PublishedAt: event.Snippet.PublishedAt,
-				Amount:      float64(event.Snippet.SuperStickerDetails.AmountMicros) / 100000,
-				Currency:    event.Snippet.SuperStickerDetails.Currency,
-				StickerId:   event.Snippet.SuperStickerDetails.SuperStickerMetadata.StickerId,
-				AltText:     event.Snippet.SuperStickerDetails.SuperStickerMetadata.AltText,
-				SentBy:      ChatUser{
-					AuthorName:       event.AuthorDetails.DisplayName,
-					AuthorId:         event.AuthorDetails.ChannelId,
-					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
-					ChatOwner:        event.AuthorDetails.IsChatOwner,
-					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
-					Verified:         event.AuthorDetails.IsVerified,
-				},
+			amountMicros, err := strconv.ParseFloat(event.Snippet.SuperChatDetails.AmountMicros, 64)
+			if err == nil {
+				outbound.ChatEvents[i] = ChatSuperSticker{
+					Id:          event.Id,
+					Type:        "supersticker",
+					PublishedAt: event.Snippet.PublishedAt,
+					Amount:      amountMicros / 1000000,
+					Currency:    event.Snippet.SuperStickerDetails.Currency,
+					StickerId:   event.Snippet.SuperStickerDetails.SuperStickerMetadata.StickerId,
+					AltText:     event.Snippet.SuperStickerDetails.SuperStickerMetadata.AltText,
+					SentBy: ChatUser{
+						AuthorName:       event.AuthorDetails.DisplayName,
+						AuthorId:         event.AuthorDetails.ChannelId,
+						AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
+						ChatOwner:        event.AuthorDetails.IsChatOwner,
+						Moderator:        event.AuthorDetails.IsChatModerator,
+						Sponsor:          event.AuthorDetails.IsChatSponsor,
+						Verified:         event.AuthorDetails.IsVerified,
+					},
+				}
 			}
 		case "textMessageEvent":
 			outbound.ChatEvents[i] = ChatMessage{

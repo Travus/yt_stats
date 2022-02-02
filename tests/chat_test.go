@@ -17,7 +17,7 @@ const chatId = "Cg0KC01HNmd2Z0hGMEtJKicKGFVDcWFJWmNjNHBpWjkxMXl0ZWlQTFVXURILTUc2
 // Required to convert sample data into the state it would otherwise be.
 func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 	var outbound yt_stats.ChatOutbound
-	var inbound []interface{}
+	var inbound interface{}
 	read, err := os.Open(f)
 	if err != nil {
 		t.Fatal(err)
@@ -30,70 +30,99 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 	if err != nil {
 		t.Fatal(err)
 	}
-	outbound.ChatEvents = make([]interface{}, len(inbound))
-	for i, rawEntry := range inbound {
-		if entry, ok := rawEntry.(map[string]interface{}); ok {
-			if entry["type"] == "message" {
-				event := yt_stats.ChatMessage{
-					Id:          entry["id"].(string),
-					Type:        "message",
-					PublishedAt: entry["published_at"].(string),
-					Message:     entry["message"].(string),
-				}
-				if author, authorOk := entry["author"].(map[string]interface{}); authorOk {
-					event.Author = yt_stats.ChatUser{
-						AuthorName:       author["author_name"].(string),
-						AuthorId:         author["author_id"].(string),
-						AuthorChannelUrl: author["author_channel_url"].(string),
-						ChatOwner:        author["chat_owner"].(bool),
-						Moderator:        author["moderator"].(bool),
-						Sponsor:          author["sponsor"].(bool),
-						Verified:         author["verified"].(bool),
+	if topLevel, ok := inbound.(map[string]interface{}); ok {
+		outbound.ChatId = topLevel["chat_id"].(string)
+		outbound.NextPageToken = topLevel["page_token"].(string)
+		outbound.SuggestedCooldown = int(topLevel["suggested_cooldown"].(float64))
+		outbound.ChatEvents = make([]interface{}, len(topLevel["chat_events"].([]interface{})))
+		for i, rawEntry := range topLevel["chat_events"].([]interface{}) {
+			if entry, entryOk := rawEntry.(map[string]interface{}); entryOk {
+				if entry["type"] == "message" {
+					event := yt_stats.ChatMessage{
+						Id:          entry["id"].(string),
+						Type:        "message",
+						PublishedAt: entry["published_at"].(string),
+						Message:     entry["message"].(string),
 					}
-				}
-				outbound.ChatEvents[i] = event
-			} else if entry["type"] == "sponsor" {
-				event := yt_stats.ChatNewSponsor{
-					Id:          entry["id"].(string),
-					Type:        "sponsor",
-					PublishedAt: entry["published_at"].(string),
-					Message:     entry["message"].(string),
-				}
-				if author, authorOk := entry["new_sponsor"].(map[string]interface{}); authorOk {
-					event.NewSponsor = yt_stats.ChatUser{
-						AuthorName:       author["author_name"].(string),
-						AuthorId:         author["author_id"].(string),
-						AuthorChannelUrl: author["author_channel_url"].(string),
-						ChatOwner:        author["chat_owner"].(bool),
-						Moderator:        author["moderator"].(bool),
-						Sponsor:          author["sponsor"].(bool),
-						Verified:         author["verified"].(bool),
+					if author, authorOk := entry["author"].(map[string]interface{}); authorOk {
+						event.Author = yt_stats.ChatUser{
+							AuthorName:       author["author_name"].(string),
+							AuthorId:         author["author_id"].(string),
+							AuthorChannelUrl: author["author_channel_url"].(string),
+							ChatOwner:        author["chat_owner"].(bool),
+							Moderator:        author["moderator"].(bool),
+							Sponsor:          author["sponsor"].(bool),
+							Verified:         author["verified"].(bool),
+						}
 					}
-				}
-				outbound.ChatEvents[i] = event
-			} else if entry["type"] == "superchat" {
-				event := yt_stats.ChatSuperChat{
-					Id:          entry["id"].(string),
-					Type:        "superchat",
-					PublishedAt: entry["published_at"].(string),
-					Message:     entry["message"].(string),
-					Amount:      entry["amount"].(float64),
-					Currency:    entry["currency"].(string),
-				}
-				if author, authorOk := entry["sent_by"].(map[string]interface{}); authorOk {
-					event.SentBy = yt_stats.ChatUser{
-						AuthorName:       author["author_name"].(string),
-						AuthorId:         author["author_id"].(string),
-						AuthorChannelUrl: author["author_channel_url"].(string),
-						ChatOwner:        author["chat_owner"].(bool),
-						Moderator:        author["moderator"].(bool),
-						Sponsor:          author["sponsor"].(bool),
-						Verified:         author["verified"].(bool),
+					outbound.ChatEvents[i] = event
+				} else if entry["type"] == "sponsor" {
+					event := yt_stats.ChatNewSponsor{
+						Id:          entry["id"].(string),
+						Type:        "sponsor",
+						PublishedAt: entry["published_at"].(string),
+						Message:     entry["message"].(string),
+						Level:       entry["level"].(string),
+						Upgrade:     entry["upgrade"].(bool),
 					}
+					if author, authorOk := entry["new_sponsor"].(map[string]interface{}); authorOk {
+						event.NewSponsor = yt_stats.ChatUser{
+							AuthorName:       author["author_name"].(string),
+							AuthorId:         author["author_id"].(string),
+							AuthorChannelUrl: author["author_channel_url"].(string),
+							ChatOwner:        author["chat_owner"].(bool),
+							Moderator:        author["moderator"].(bool),
+							Sponsor:          author["sponsor"].(bool),
+							Verified:         author["verified"].(bool),
+						}
+					}
+					outbound.ChatEvents[i] = event
+				} else if entry["type"] == "membership_milestone" {
+					event := yt_stats.ChatMemberMilestone{
+						Id:          entry["id"].(string),
+						Type:        "membership_milestone",
+						PublishedAt: entry["published_at"].(string),
+						Message:     entry["message"].(string),
+						UserComment: entry["user_comment"].(string),
+						Level:       entry["level"].(string),
+						Months:      int(entry["months"].(float64)),
+					}
+					if author, authorOk := entry["member"].(map[string]interface{}); authorOk {
+						event.Member = yt_stats.ChatUser{
+							AuthorName:       author["author_name"].(string),
+							AuthorId:         author["author_id"].(string),
+							AuthorChannelUrl: author["author_channel_url"].(string),
+							ChatOwner:        author["chat_owner"].(bool),
+							Moderator:        author["moderator"].(bool),
+							Sponsor:          author["sponsor"].(bool),
+							Verified:         author["verified"].(bool),
+						}
+					}
+					outbound.ChatEvents[i] = event
+				} else if entry["type"] == "superchat" {
+					event := yt_stats.ChatSuperChat{
+						Id:          entry["id"].(string),
+						Type:        "superchat",
+						PublishedAt: entry["published_at"].(string),
+						Message:     entry["message"].(string),
+						Amount:      entry["amount"].(float64),
+						Currency:    entry["currency"].(string),
+					}
+					if author, authorOk := entry["sent_by"].(map[string]interface{}); authorOk {
+						event.SentBy = yt_stats.ChatUser{
+							AuthorName:       author["author_name"].(string),
+							AuthorId:         author["author_id"].(string),
+							AuthorChannelUrl: author["author_channel_url"].(string),
+							ChatOwner:        author["chat_owner"].(bool),
+							Moderator:        author["moderator"].(bool),
+							Sponsor:          author["sponsor"].(bool),
+							Verified:         author["verified"].(bool),
+						}
+					}
+					outbound.ChatEvents[i] = event
+				} else {
+					outbound.ChatEvents[i] = nil
 				}
-				outbound.ChatEvents[i] = event
-			} else {
-				outbound.ChatEvents[i] = nil
 			}
 		}
 	}
@@ -164,7 +193,7 @@ func TestChatHandlerClosedChat(t *testing.T) {
 	if status := rr.Code; status != http.StatusForbidden {
 		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusForbidden, status)
 	}
-	expected := fmt.Sprintf(`{"quota_usage":8,"status_code":%d,"status_message":"liveChatEnded"}`,
+	expected := fmt.Sprintf(`{"quota_usage":5,"status_code":%d,"status_message":"liveChatEnded"}`,
 		http.StatusForbidden)
 	if strings.Trim(rr.Body.String(), "\n") != expected {
 		t.Errorf("handler returned wrong body: expected %v actually %v", expected, rr.Body.String())
