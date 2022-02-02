@@ -27,7 +27,7 @@ func StreamHandler(input Inputs) http.Handler {
 			}
 			ids := r.URL.Query().Get("id")
 			if ids == "" {
-				sendStatusCode(w, quota, http.StatusBadRequest, "videoIdMissing")
+				sendStatusCode(w, quota, http.StatusBadRequest, "streamIdMissing")
 				return
 			}
 			if len(strings.Split(ids, ",")) > 50 {
