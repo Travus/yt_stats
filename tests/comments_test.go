@@ -162,7 +162,8 @@ func TestCommentSearch(t *testing.T) {
 
 func TestCommentsHandlerSuccess(t *testing.T) {
 	var response yt_stats.CommentOutbound
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=%s&id=%s", getKey(t), videoId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,8 +196,8 @@ func TestCommentsHandlerSearchSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=%s&id=%s",
-		getKey(t), videoId), bytes.NewReader(body))
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), bytes.NewReader(body))
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +223,8 @@ func TestCommentsHandlerSearchSuccess(t *testing.T) {
 }
 
 func TestCommentsHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=invalid&id=%s", videoId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -240,8 +242,8 @@ func TestCommentsHandlerInvalidKey(t *testing.T) {
 
 func TestCommentsHandlerInvalidSearch(t *testing.T) {
 	body := "invalid"
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=invalid&id=%s", videoId),
-		strings.NewReader(body))
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), strings.NewReader(body))
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -263,7 +265,8 @@ func TestCommentsHandlerNoKey(t *testing.T) {
 }
 
 func TestCommentsHandlerNoVideo(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/comments/", nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}

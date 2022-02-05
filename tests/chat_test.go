@@ -144,7 +144,8 @@ func TestChatParser(t *testing.T) {
 }
 
 func TestChatHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/chat/?key=invalid&id=%s", chatId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/chat/?id=%s", chatId), nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +166,8 @@ func TestChatHandlerNoKey(t *testing.T) {
 }
 
 func TestChatHandlerNoChatId(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/chat/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/chat/", nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +185,8 @@ func TestChatHandlerNoChatId(t *testing.T) {
 }
 
 func TestChatHandlerClosedChat(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/chat/?key=%s&id=%s", getKey(t), chatId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/chat/?id=%s", chatId), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}

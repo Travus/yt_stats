@@ -14,7 +14,7 @@ import (
 )
 
 // Retrieves a valid API token from a 'token' file to run tests with.
-func getKey(t *testing.T) string {
+func getTestKey(t *testing.T) string {
 	resp, err := ioutil.ReadFile("yt_token")
 	if err != nil {
 		t.Fatal(err)

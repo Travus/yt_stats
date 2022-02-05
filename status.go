@@ -18,7 +18,7 @@ func StatusHandler(input Inputs) http.Handler {
 
 			// Check user input, this endpoint is allowed to progress even without a key.
 			var youtubeStatus StatusCodeOutbound
-			key := r.URL.Query().Get("key")
+			key := getKey(r)
 
 			// Query youtube to check for youtube API status.
 			uptime := time.Since(input.StartTime).Round(time.Second).Seconds()

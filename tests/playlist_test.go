@@ -133,8 +133,8 @@ func TestFullPlaylistParsing(t *testing.T) {
 
 func TestPlaylistHandlerSuccess(t *testing.T) {
 	var response yt_stats.PlaylistOutbound
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s&id=%s&videos=%s&stats=%s",
-		getKey(t), PlaylistIds, "true", "false"), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?id=%s&videos=%s&stats=%s", PlaylistIds, "true", "false"), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,8 +166,8 @@ func TestPlaylistHandlerSuccess(t *testing.T) {
 }
 
 func TestPlaylistHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=invalid&id=%s",
-		PlaylistIds), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?id=%s", PlaylistIds), nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,8 +188,8 @@ func TestPlaylistHandlerNoKey(t *testing.T) {
 }
 
 func TestPlaylistHandlerInvalidFlag(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s&id=%s&videos=invalid",
-		getKey(t), PlaylistIds), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?id=%s&videos=invalid", PlaylistIds), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,8 @@ func TestPlaylistHandlerInvalidFlag(t *testing.T) {
 }
 
 func TestPlaylistHandlerNoPlaylist(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/playlist", nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,8 +225,8 @@ func TestPlaylistHandlerNoPlaylist(t *testing.T) {
 }
 
 func TestPlaylistHandlerTooManyPlaylists(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s&id=%s",
-		getKey(t), strings.Repeat(",", 50)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?id=%s", strings.Repeat(",", 50)), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}

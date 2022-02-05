@@ -20,7 +20,7 @@ func VideoHandler(input Inputs) http.Handler {
 			// Check user input and fail if input is incorrect or missing.
 			var youtubeStatus StatusCodeOutbound
 			videoInbound := make([]VideoInbound, 1)
-			key := r.URL.Query().Get("key")
+			key := getKey(r)
 			if key == "" {
 				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
 				return

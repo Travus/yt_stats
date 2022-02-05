@@ -156,7 +156,7 @@ func CommentsHandler(input Inputs) http.Handler {
 		case http.MethodGet:
 
 			// Check user input and fail if input is incorrect or missing.
-			key := r.URL.Query().Get("key")
+			key := getKey(r)
 			if key == "" {
 				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
 				return

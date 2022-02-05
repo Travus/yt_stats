@@ -84,7 +84,8 @@ func TestStreamParser(t *testing.T) {
 }
 
 func TestStreamHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/stream/?key=invalid&id=%s", streamId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/stream/?id=%s", streamId), nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +106,8 @@ func TestStreamHandlerNoKey(t *testing.T) {
 }
 
 func TestStreamHandlerNoVideo(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/stream/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/stream/", nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,8 +125,8 @@ func TestStreamHandlerNoVideo(t *testing.T) {
 }
 
 func TestStreamHandlerTooManyVideos(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/stream/?key=%s&id=%s",
-		getKey(t), strings.Repeat(",", 50)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/stream/?id=%s", strings.Repeat(",", 50)), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +143,8 @@ func TestStreamHandlerTooManyVideos(t *testing.T) {
 }
 
 func TestStreamHandlerSuccess(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/stream/?key=%s&id=%s", getKey(t), streamId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/stream/?id=%s", streamId), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
