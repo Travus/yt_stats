@@ -51,28 +51,28 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 							AuthorChannelUrl: author["author_channel_url"].(string),
 							ChatOwner:        author["chat_owner"].(bool),
 							Moderator:        author["moderator"].(bool),
-							Sponsor:          author["sponsor"].(bool),
+							Member:           author["member"].(bool),
 							Verified:         author["verified"].(bool),
 						}
 					}
 					outbound.ChatEvents[i] = event
-				} else if entry["type"] == "sponsor" {
-					event := yt_stats.ChatNewSponsor{
+				} else if entry["type"] == "new_member" {
+					event := yt_stats.ChatNewMember{
 						Id:          entry["id"].(string),
-						Type:        "sponsor",
+						Type:        "new_member",
 						PublishedAt: entry["published_at"].(string),
 						Message:     entry["message"].(string),
 						Level:       entry["level"].(string),
 						Upgrade:     entry["upgrade"].(bool),
 					}
-					if author, authorOk := entry["new_sponsor"].(map[string]interface{}); authorOk {
-						event.NewSponsor = yt_stats.ChatUser{
+					if author, authorOk := entry["new_member"].(map[string]interface{}); authorOk {
+						event.NewMember = yt_stats.ChatUser{
 							AuthorName:       author["author_name"].(string),
 							AuthorId:         author["author_id"].(string),
 							AuthorChannelUrl: author["author_channel_url"].(string),
 							ChatOwner:        author["chat_owner"].(bool),
 							Moderator:        author["moderator"].(bool),
-							Sponsor:          author["sponsor"].(bool),
+							Member:           author["member"].(bool),
 							Verified:         author["verified"].(bool),
 						}
 					}
@@ -94,7 +94,7 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 							AuthorChannelUrl: author["author_channel_url"].(string),
 							ChatOwner:        author["chat_owner"].(bool),
 							Moderator:        author["moderator"].(bool),
-							Sponsor:          author["sponsor"].(bool),
+							Member:           author["member"].(bool),
 							Verified:         author["verified"].(bool),
 						}
 					}
@@ -115,7 +115,7 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 							AuthorChannelUrl: author["author_channel_url"].(string),
 							ChatOwner:        author["chat_owner"].(bool),
 							Moderator:        author["moderator"].(bool),
-							Sponsor:          author["sponsor"].(bool),
+							Member:           author["member"].(bool),
 							Verified:         author["verified"].(bool),
 						}
 					}

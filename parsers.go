@@ -350,25 +350,25 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 					ChatOwner:        event.AuthorDetails.IsChatOwner,
 					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Member:           event.AuthorDetails.IsChatSponsor,
 					Verified:         event.AuthorDetails.IsVerified,
 				},
 			}
 		case "newSponsorEvent":
-			outbound.ChatEvents[i] = ChatNewSponsor{
+			outbound.ChatEvents[i] = ChatNewMember{
 				Id:          event.Id,
-				Type:        "sponsor",
+				Type:        "new_member",
 				PublishedAt: event.Snippet.PublishedAt,
 				Message:     event.Snippet.DisplayMessage,
 				Level:       event.Snippet.NewSponsorDetails.MemberLevelName,
 				Upgrade:     event.Snippet.NewSponsorDetails.IsUpgrade,
-				NewSponsor: ChatUser{
+				NewMember: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
 					AuthorId:         event.AuthorDetails.ChannelId,
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 					ChatOwner:        event.AuthorDetails.IsChatOwner,
 					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Member:           event.AuthorDetails.IsChatSponsor,
 					Verified:         event.AuthorDetails.IsVerified,
 				},
 			}
@@ -387,14 +387,14 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 					ChatOwner:        event.AuthorDetails.IsChatOwner,
 					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Member:           event.AuthorDetails.IsChatSponsor,
 					Verified:         event.AuthorDetails.IsVerified,
 				},
 			}
 		case "sponsorOnlyModeEndedEvent":
-			outbound.ChatEvents[i] = ChatSponsorOnlyModeEnded{
+			outbound.ChatEvents[i] = ChatMemberOnlyModeEnded{
 				Id:          event.Id,
-				Type:        "sponsor_only_off",
+				Type:        "member_only_off",
 				PublishedAt: event.Snippet.PublishedAt,
 				EndedBy: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
@@ -402,14 +402,14 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 					ChatOwner:        event.AuthorDetails.IsChatOwner,
 					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Member:           event.AuthorDetails.IsChatSponsor,
 					Verified:         event.AuthorDetails.IsVerified,
 				},
 			}
 		case "sponsorOnlyModeStartedEvent":
-			outbound.ChatEvents[i] = ChatSponsorOnlyModeStarted{
+			outbound.ChatEvents[i] = ChatMemberOnlyModeStarted{
 				Id:          event.Id,
-				Type:        "sponsor_only_on",
+				Type:        "member_only_on",
 				PublishedAt: event.Snippet.PublishedAt,
 				StartedBy: ChatUser{
 					AuthorName:       event.AuthorDetails.DisplayName,
@@ -417,7 +417,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 					ChatOwner:        event.AuthorDetails.IsChatOwner,
 					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Member:           event.AuthorDetails.IsChatSponsor,
 					Verified:         event.AuthorDetails.IsVerified,
 				},
 			}
@@ -437,7 +437,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 						AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 						ChatOwner:        event.AuthorDetails.IsChatOwner,
 						Moderator:        event.AuthorDetails.IsChatModerator,
-						Sponsor:          event.AuthorDetails.IsChatSponsor,
+						Member:           event.AuthorDetails.IsChatSponsor,
 						Verified:         event.AuthorDetails.IsVerified,
 					},
 				}
@@ -459,7 +459,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 						AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 						ChatOwner:        event.AuthorDetails.IsChatOwner,
 						Moderator:        event.AuthorDetails.IsChatModerator,
-						Sponsor:          event.AuthorDetails.IsChatSponsor,
+						Member:           event.AuthorDetails.IsChatSponsor,
 						Verified:         event.AuthorDetails.IsVerified,
 					},
 				}
@@ -476,7 +476,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 					ChatOwner:        event.AuthorDetails.IsChatOwner,
 					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Member:           event.AuthorDetails.IsChatSponsor,
 					Verified:         event.AuthorDetails.IsVerified,
 				},
 			}
@@ -504,7 +504,7 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 					AuthorChannelUrl: event.AuthorDetails.ChannelUrl,
 					ChatOwner:        event.AuthorDetails.IsChatOwner,
 					Moderator:        event.AuthorDetails.IsChatModerator,
-					Sponsor:          event.AuthorDetails.IsChatSponsor,
+					Member:           event.AuthorDetails.IsChatSponsor,
 					Verified:         event.AuthorDetails.IsVerified,
 				},
 			}

@@ -435,7 +435,7 @@ type ChatUser struct {
 	AuthorChannelUrl string `json:"author_channel_url"`
 	ChatOwner        bool   `json:"chat_owner,omitempty"`
 	Moderator        bool   `json:"moderator,omitempty"`
-	Sponsor          bool   `json:"sponsor,omitempty"`
+	Member           bool   `json:"member,omitempty"`
 	Verified         bool   `json:"verified,omitempty"`
 }
 
@@ -455,15 +455,15 @@ type ChatMessageDeleted struct {
 	DeletedBy      ChatUser `json:"deleted_by"`
 }
 
-// ChatNewSponsor represents the JSON for a new sponsor or sponsor change. Part of ChatOutbound.
-type ChatNewSponsor struct {
+// ChatNewMember represents the JSON for a new member or member level change. Part of ChatOutbound.
+type ChatNewMember struct {
 	Id          string   `json:"id"`
 	Type        string   `json:"type"`
 	PublishedAt string   `json:"published_at"`
 	Message     string   `json:"message"`
 	Level       string   `json:"level"`
 	Upgrade     bool     `json:"upgrade"`
-	NewSponsor  ChatUser `json:"new_sponsor"`
+	NewMember   ChatUser `json:"new_member"`
 }
 
 // ChatMemberMilestone represents the JSON for a member announcing membership renewal. Part of ChatOutbound.
@@ -478,16 +478,16 @@ type ChatMemberMilestone struct {
 	Member      ChatUser `json:"member"`
 }
 
-// ChatSponsorOnlyModeEnded represents the JSON for a chat stopping sponsor only mode. Part of ChatOutbound.
-type ChatSponsorOnlyModeEnded struct {
+// ChatMemberOnlyModeEnded represents the JSON for a chat stopping member only mode. Part of ChatOutbound.
+type ChatMemberOnlyModeEnded struct {
 	Id          string   `json:"id"`
 	Type        string   `json:"type"`
 	PublishedAt string   `json:"published_at"`
 	EndedBy     ChatUser `json:"ended_by"`
 }
 
-// ChatSponsorOnlyModeStarted represents the JSON for a chat starting sponsor only mode. Part of ChatOutbound.
-type ChatSponsorOnlyModeStarted struct {
+// ChatMemberOnlyModeStarted represents the JSON for a chat starting member only mode. Part of ChatOutbound.
+type ChatMemberOnlyModeStarted struct {
 	Id          string   `json:"id"`
 	Type        string   `json:"type"`
 	PublishedAt string   `json:"published_at"`
