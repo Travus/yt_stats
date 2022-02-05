@@ -177,12 +177,12 @@ func TestCommentsHandlerSuccess(t *testing.T) {
 		t.Fatal("failed decoding response from endpoint")
 	}
 	if response.VideoId != videoId {
-		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s",videoId, response.VideoId)
+		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s", videoId, response.VideoId)
 	}
 	if !(len(response.Comments) >= 48) {
 		t.Errorf("handler returned wrong body: expected more than 48 results, received only %d", len(response.Comments))
 	}
-	if response.QuotaUsage < 5 {
+	if response.QuotaUsage < 1 {
 		t.Error("handler returned low quota usage.")
 	}
 }
@@ -211,12 +211,12 @@ func TestCommentsHandlerSearchSuccess(t *testing.T) {
 		t.Fatal("failed decoding response from endpoint")
 	}
 	if response.VideoId != videoId {
-		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s",videoId, response.VideoId)
+		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s", videoId, response.VideoId)
 	}
 	if len(response.Comments) > 20 || len(response.Comments) == 0 {
 		t.Errorf("handler returned wrong body: got wrong number of comments, got %d", len(response.Comments))
 	}
-	if response.QuotaUsage < 5 {
+	if response.QuotaUsage < 1 {
 		t.Error("handler returned low quota usage.")
 	}
 }
@@ -262,7 +262,6 @@ func TestCommentsHandlerNoKey(t *testing.T) {
 	keyMissing(t, yt_stats.CommentsHandler, fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId))
 }
 
-
 func TestCommentsHandlerNoVideo(t *testing.T) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=%s", getKey(t)), nil)
 	if err != nil {
@@ -284,4 +283,3 @@ func TestCommentsHandlerNoVideo(t *testing.T) {
 func TestCommentsHandlerUnsupportedType(t *testing.T) {
 	unsupportedRequestType(t, yt_stats.CommentsHandler, "/ytstats/v1/comments/", "PUT")
 }
-

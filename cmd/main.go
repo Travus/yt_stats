@@ -14,9 +14,9 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		_, err := fmt.Fprintf(w, "This API provides statistics for youtube channels, playlists and videos.\n" +
-			"Additionally it also provides an easy way to retrieve all comments and replies on a video.\n" +
-			"Comments and replies can be filtered by author and content.\n\n" +
+		_, err := fmt.Fprintf(w, "This API provides statistics for youtube channels, playlists and videos.\n"+
+			"Additionally it also provides an easy way to retrieve all comments and replies on a video.\n"+
+			"Comments and replies can be filtered by author and content.\n\n"+
 			"For more info see: https://github.com/Travus/yt_stats")
 		if err != nil {
 			log.Printf("Something went wrong writing REST API info.")

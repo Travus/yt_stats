@@ -42,11 +42,11 @@ func StreamHandler(input Inputs) http.Handler {
 				return
 			}
 			defer resp.Body.Close()
-			quota += 3
+			quota++
 			youtubeStatus = ErrorParser(resp.Body, &streamInbound)
 			if youtubeStatus.StatusCode != http.StatusOK {
 				if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
-					quota -= 3
+					quota--
 				}
 				sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return

@@ -42,11 +42,11 @@ func ChannelHandler(input Inputs) http.Handler {
 				return
 			}
 			defer resp.Body.Close()
-			quota += 7
+			quota++
 			youtubeStatus = ErrorParser(resp.Body, &channelInbound)
 			if youtubeStatus.StatusCode != http.StatusOK {
 				if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
-					quota -= 7
+					quota--
 				}
 				sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return

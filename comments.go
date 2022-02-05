@@ -120,7 +120,7 @@ func worker(in <-chan string, c *[]interface{}, r chan<- StatusCodeOutbound, m *
 					}
 				}
 				defer resp.Body.Close()
-				quota += 2 // Snippet cost for this endpoint is 1 less than everywhere else.
+				quota++
 				youtubeStatus = ErrorParser(resp.Body, &repliesInbound)
 				if youtubeStatus.StatusCode != http.StatusOK {
 					return youtubeStatus
@@ -196,11 +196,11 @@ func CommentsHandler(input Inputs) http.Handler {
 						return false
 					}
 					defer resp.Body.Close()
-					quota += 5
+					quota++
 					youtubeStatus = ErrorParser(resp.Body, &commentsInbound)
 					if youtubeStatus.StatusCode != http.StatusOK {
 						if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
-							quota -= 5
+							quota--
 						}
 						sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 						return false

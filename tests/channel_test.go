@@ -47,8 +47,8 @@ func TestChannelHandlerSuccess(t *testing.T) {
 	if response.Channels[0].Id != ChannelId {
 		t.Error("handler returned wrong body, got back wrong channel id.")
 	}
-	if response.QuotaUsage != 7 {
-		t.Errorf("handler returned wrong quota usage: expected %d actually %d", 7, response.QuotaUsage)
+	if response.QuotaUsage != 1 {
+		t.Errorf("handler returned wrong quota usage: expected 1 actually %d", response.QuotaUsage)
 	}
 }
 

@@ -156,8 +156,8 @@ func TestStreamHandlerSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if response.QuotaUsage != 3 || len(response.Streams) != 1 {
-		t.Errorf("handler returned wrong body: expected 3 quota and 1 stream actually %d quota and %d streams",
+	if response.QuotaUsage != 1 || len(response.Streams) != 1 {
+		t.Errorf("handler returned wrong body: expected 1 quota and 1 stream actually %d quota and %d streams",
 			response.QuotaUsage, len(response.Streams))
 	}
 }
