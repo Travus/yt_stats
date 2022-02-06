@@ -42,6 +42,7 @@ func parseFile(t *testing.T, f string, s interface{}) {
 func getInputs() yt_stats.Inputs {
 	return yt_stats.Inputs{
 		StartTime:         time.Now(),
+		StatusCheck:       "https://www.googleapis.com/youtube/v3/channels?part=id&id=UCBR8-60-B28hp2BmDPdntcQ",
 		RepliesRoot:       "https://www.googleapis.com/youtube/v3/comments?part=snippet&maxResults=100&textFormat=plainText",
 		CommentsRoot:      "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet,replies&maxResults=100&textFormat=plainText",
 		ChannelsRoot:      "https://www.googleapis.com/youtube/v3/channels?part=id,snippet,contentDetails,statistics&maxResults=50",

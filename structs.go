@@ -7,6 +7,7 @@ import (
 // Inputs stores variables sent to the handlers, basically global variables.
 type Inputs struct {
 	StartTime         time.Time
+	StatusCheck       string
 	RepliesRoot       string
 	CommentsRoot      string
 	ChannelsRoot      string

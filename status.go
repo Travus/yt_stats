@@ -22,8 +22,7 @@ func StatusHandler(input Inputs) http.Handler {
 
 			// Query youtube to check for youtube API status.
 			uptime := time.Since(input.StartTime).Round(time.Second).Seconds()
-			statusRoot := "https://www.googleapis.com/youtube/v3/channels?part=id"
-			resp, err := http.Get(fmt.Sprintf("%s&id=UCBR8-60-B28hp2BmDPdntcQ&key=%s", statusRoot, key))
+			resp, err := http.Get(fmt.Sprintf("%s&key=%s", input.StatusCheck, key))
 			if err != nil {
 				sendStatusCode(w, quota, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return
