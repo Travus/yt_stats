@@ -28,19 +28,19 @@ func runInProduction(mux *http.ServeMux) {
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		Cache:      autocert.DirCache("cert-cache"),
-		HostPolicy: autocert.HostWhitelist("travus.me"),
+		HostPolicy: autocert.HostWhitelist(os.Getenv("tls_address")),
 	}
 
 	// Serve REST API.
 	server := &http.Server{
-		Addr:    ":443",
+		Addr:    ":8081",
 		Handler: mux,
 		TLSConfig: &tls.Config{
 			GetCertificate: certManager.GetCertificate,
 		},
 	}
 	go func() {
-		err := http.ListenAndServe(":80", certManager.HTTPHandler(nil))
+		err := http.ListenAndServe(":8080", certManager.HTTPHandler(nil))
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -89,7 +89,7 @@ func main() {
 	mux.Handle("/ytstats/v1/stream/", yt_stats.StreamHandler(inputs))
 	mux.Handle("/ytstats/v1/chat/", yt_stats.ChatHandler(inputs))
 
-	if os.Getenv("mode") == "PRODUCTION" {
+	if os.Getenv("tls_address") != "" {
 		runInProduction(mux)
 	} else {
 		runInDev(mux)
