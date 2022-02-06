@@ -40,15 +40,9 @@ func runInProduction(mux *http.ServeMux) {
 		},
 	}
 	go func() {
-		err := http.ListenAndServe(":8080", certManager.HTTPHandler(nil))
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		log.Fatal(http.ListenAndServe(":8080", certManager.HTTPHandler(nil)))
 	}()
-	err := server.ListenAndServeTLS("", "")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	log.Fatal(server.ListenAndServeTLS("", ""))
 }
 
 func runInDev(mux *http.ServeMux) {
@@ -57,10 +51,7 @@ func runInDev(mux *http.ServeMux) {
 		Addr:    ":8080",
 		Handler: mux,
 	}
-	err := server.ListenAndServe()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	log.Fatal(server.ListenAndServe())
 }
 
 func main() {
