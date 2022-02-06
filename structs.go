@@ -424,7 +424,7 @@ type ChatInbound struct {
 type ChatOutbound struct {
 	QuotaUsage        int           `json:"quota_usage"`
 	ChatId            string        `json:"chat_id"`
-	NextPageToken     string        `json:"page_token"`
+	NextPage          string        `json:"next_page"`
 	SuggestedCooldown int           `json:"suggested_cooldown"`
 	ChatEvents        []interface{} `json:"chat_events"`
 }

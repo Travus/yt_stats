@@ -327,7 +327,7 @@ func StreamParser(inbound StreamInbound) StreamOutbound {
 func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 	var outbound ChatOutbound
 	outbound.ChatId = chatId
-	outbound.NextPageToken = inbound.NextPageToken
+	outbound.NextPage = inbound.NextPageToken
 	outbound.SuggestedCooldown = inbound.PollingIntervalMillis
 	outbound.ChatEvents = make([]interface{}, len(inbound.Items))
 	for i, event := range inbound.Items {

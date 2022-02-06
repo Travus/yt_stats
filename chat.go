@@ -34,9 +34,10 @@ func ChatHandler(input Inputs) http.Handler {
 				sendStatusCode(w, quota, http.StatusBadRequest, "tooManyItems")
 				return
 			}
+			page := r.URL.Query().Get("page")
 
 			// Query youtube and check response for errors.
-			resp, err := http.Get(fmt.Sprintf("%s&liveChatId=%s&key=%s", input.ChatRoot, url.QueryEscape(id), key))
+			resp, err := http.Get(fmt.Sprintf("%s&liveChatId=%s&key=%s&pageToken=%s", input.ChatRoot, url.QueryEscape(id), key, page))
 			if err != nil {
 				sendStatusCode(w, quota, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return

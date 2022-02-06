@@ -32,7 +32,7 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 	}
 	if topLevel, ok := inbound.(map[string]interface{}); ok {
 		outbound.ChatId = topLevel["chat_id"].(string)
-		outbound.NextPageToken = topLevel["page_token"].(string)
+		outbound.NextPage = topLevel["next_page"].(string)
 		outbound.SuggestedCooldown = int(topLevel["suggested_cooldown"].(float64))
 		outbound.ChatEvents = make([]interface{}, len(topLevel["chat_events"].([]interface{})))
 		for i, rawEntry := range topLevel["chat_events"].([]interface{}) {
