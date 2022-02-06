@@ -1,9 +1,12 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
+	"os"
 	"time"
 	"yt_stats"
 )
@@ -27,6 +30,46 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func runInProduction(mux *http.ServeMux) {
+	// Setup Automated Certificate Management Environment (ACME)
+	certManager := autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		Cache:      autocert.DirCache("cert-cache"),
+		HostPolicy: autocert.HostWhitelist("travus.me"),
+	}
+
+	// Serve REST API.
+	server := &http.Server{
+		Addr:    ":443",
+		Handler: mux,
+		TLSConfig: &tls.Config{
+			GetCertificate: certManager.GetCertificate,
+		},
+	}
+	go func() {
+		err := http.ListenAndServe(":80", certManager.HTTPHandler(nil))
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	}()
+	err := server.ListenAndServeTLS("", "")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func runInDev(mux *http.ServeMux) {
+	// Serve REST API.
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
 func main() {
 
 	// Set global values.
@@ -42,20 +85,20 @@ func main() {
 		ChatRoot:          "https://www.googleapis.com/youtube/v3/liveChat/messages?part=id,snippet,authorDetails&maxResults=2000",
 	}
 
-	// Set port to 8080 and start handlers.
-	port := "8080"
-	http.HandleFunc("/ytstats/v1/", defaultHandler)
-	http.Handle("/ytstats/v1/status/", yt_stats.StatusHandler(inputs))
-	http.Handle("/ytstats/v1/channel/", yt_stats.ChannelHandler(inputs))
-	http.Handle("/ytstats/v1/playlist/", yt_stats.PlaylistHandler(inputs))
-	http.Handle("/ytstats/v1/video/", yt_stats.VideoHandler(inputs))
-	http.Handle("/ytstats/v1/comments/", yt_stats.CommentsHandler(inputs))
-	http.Handle("/ytstats/v1/stream/", yt_stats.StreamHandler(inputs))
-	http.Handle("/ytstats/v1/chat/", yt_stats.ChatHandler(inputs))
+	// Setup handlers.
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ytstats/v1/", defaultHandler)
+	mux.Handle("/ytstats/v1/status/", yt_stats.StatusHandler(inputs))
+	mux.Handle("/ytstats/v1/channel/", yt_stats.ChannelHandler(inputs))
+	mux.Handle("/ytstats/v1/playlist/", yt_stats.PlaylistHandler(inputs))
+	mux.Handle("/ytstats/v1/video/", yt_stats.VideoHandler(inputs))
+	mux.Handle("/ytstats/v1/comments/", yt_stats.CommentsHandler(inputs))
+	mux.Handle("/ytstats/v1/stream/", yt_stats.StreamHandler(inputs))
+	mux.Handle("/ytstats/v1/chat/", yt_stats.ChatHandler(inputs))
 
-	// Serve REST API.
-	err := http.ListenAndServe(":"+port, nil)
-	if err != nil {
-		log.Fatal(err.Error())
+	if os.Getenv("mode") == "PRODUCTION" {
+		runInProduction(mux)
+	} else {
+		runInDev(mux)
 	}
 }
