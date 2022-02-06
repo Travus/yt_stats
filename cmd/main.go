@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
@@ -16,14 +15,8 @@ import (
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		_, err := fmt.Fprintf(w, "This API provides statistics for youtube channels, playlists and videos.\n"+
-			"Additionally it also provides an easy way to retrieve all comments and replies on a video.\n"+
-			"Comments and replies can be filtered by author and content.\n\n"+
-			"For more info see: https://github.com/Travus/yt_stats")
-		if err != nil {
-			log.Printf("Something went wrong writing REST API info.")
-		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		http.ServeFile(w, r, "html/ytstats.v1.html")
 		break
 	default:
 		http.Error(w, "Request type not supported.", http.StatusNotImplemented)
