@@ -431,13 +431,13 @@ type ChatOutbound struct {
 
 // ChatUser represents the JSON for a user in chat. Part of chat events.
 type ChatUser struct {
-	AuthorName       string `json:"author_name"`
-	AuthorId         string `json:"author_id"`
-	AuthorChannelUrl string `json:"author_channel_url"`
-	ChatOwner        bool   `json:"chat_owner,omitempty"`
-	Moderator        bool   `json:"moderator,omitempty"`
-	Member           bool   `json:"member,omitempty"`
-	Verified         bool   `json:"verified,omitempty"`
+	UserName       string `json:"user_name"`
+	UserId         string `json:"user_id"`
+	UserChannelUrl string `json:"user_channel_url"`
+	ChatOwner      bool   `json:"chat_owner,omitempty"`
+	Moderator      bool   `json:"moderator,omitempty"`
+	Member         bool   `json:"member,omitempty"`
+	Verified       bool   `json:"verified,omitempty"`
 }
 
 // ChatEnded represents the JSON for the chat ending. Part of ChatOutbound.

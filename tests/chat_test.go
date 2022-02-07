@@ -46,13 +46,13 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 					}
 					if author, authorOk := entry["author"].(map[string]interface{}); authorOk {
 						event.Author = yt_stats.ChatUser{
-							AuthorName:       author["author_name"].(string),
-							AuthorId:         author["author_id"].(string),
-							AuthorChannelUrl: author["author_channel_url"].(string),
-							ChatOwner:        author["chat_owner"].(bool),
-							Moderator:        author["moderator"].(bool),
-							Member:           author["member"].(bool),
-							Verified:         author["verified"].(bool),
+							UserName:       author["user_name"].(string),
+							UserId:         author["user_id"].(string),
+							UserChannelUrl: author["user_channel_url"].(string),
+							ChatOwner:      author["chat_owner"].(bool),
+							Moderator:      author["moderator"].(bool),
+							Member:         author["member"].(bool),
+							Verified:       author["verified"].(bool),
 						}
 					}
 					outbound.ChatEvents[i] = event
@@ -67,13 +67,13 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 					}
 					if author, authorOk := entry["new_member"].(map[string]interface{}); authorOk {
 						event.NewMember = yt_stats.ChatUser{
-							AuthorName:       author["author_name"].(string),
-							AuthorId:         author["author_id"].(string),
-							AuthorChannelUrl: author["author_channel_url"].(string),
-							ChatOwner:        author["chat_owner"].(bool),
-							Moderator:        author["moderator"].(bool),
-							Member:           author["member"].(bool),
-							Verified:         author["verified"].(bool),
+							UserName:       author["user_name"].(string),
+							UserId:         author["user_id"].(string),
+							UserChannelUrl: author["user_channel_url"].(string),
+							ChatOwner:      author["chat_owner"].(bool),
+							Moderator:      author["moderator"].(bool),
+							Member:         author["member"].(bool),
+							Verified:       author["verified"].(bool),
 						}
 					}
 					outbound.ChatEvents[i] = event
@@ -89,13 +89,13 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 					}
 					if author, authorOk := entry["member"].(map[string]interface{}); authorOk {
 						event.Member = yt_stats.ChatUser{
-							AuthorName:       author["author_name"].(string),
-							AuthorId:         author["author_id"].(string),
-							AuthorChannelUrl: author["author_channel_url"].(string),
-							ChatOwner:        author["chat_owner"].(bool),
-							Moderator:        author["moderator"].(bool),
-							Member:           author["member"].(bool),
-							Verified:         author["verified"].(bool),
+							UserName:       author["user_name"].(string),
+							UserId:         author["user_id"].(string),
+							UserChannelUrl: author["user_channel_url"].(string),
+							ChatOwner:      author["chat_owner"].(bool),
+							Moderator:      author["moderator"].(bool),
+							Member:         author["member"].(bool),
+							Verified:       author["verified"].(bool),
 						}
 					}
 					outbound.ChatEvents[i] = event
@@ -110,13 +110,13 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 					}
 					if author, authorOk := entry["sent_by"].(map[string]interface{}); authorOk {
 						event.SentBy = yt_stats.ChatUser{
-							AuthorName:       author["author_name"].(string),
-							AuthorId:         author["author_id"].(string),
-							AuthorChannelUrl: author["author_channel_url"].(string),
-							ChatOwner:        author["chat_owner"].(bool),
-							Moderator:        author["moderator"].(bool),
-							Member:           author["member"].(bool),
-							Verified:         author["verified"].(bool),
+							UserName:       author["user_name"].(string),
+							UserId:         author["user_id"].(string),
+							UserChannelUrl: author["user_channel_url"].(string),
+							ChatOwner:      author["chat_owner"].(bool),
+							Moderator:      author["moderator"].(bool),
+							Member:         author["member"].(bool),
+							Verified:       author["verified"].(bool),
 						}
 					}
 					outbound.ChatEvents[i] = event
