@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Handler for the video endpoint. /ytstats/v1/video/
+// VideoHandler is the handler for the video endpoint. /ytstats/v1/video/
 // Provides info of up to 50 videos, and statistics of them.
 func VideoHandler(input Inputs) http.Handler {
 	video := func(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +20,7 @@ func VideoHandler(input Inputs) http.Handler {
 			// Check user input and fail if input is incorrect or missing.
 			var youtubeStatus StatusCodeOutbound
 			videoInbound := make([]VideoInbound, 1)
-			key := r.URL.Query().Get("key")
+			key := getKey(r)
 			if key == "" {
 				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
 				return
@@ -47,11 +47,11 @@ func VideoHandler(input Inputs) http.Handler {
 				return
 			}
 			defer resp.Body.Close()
-			quota += 7
+			quota++
 			youtubeStatus = ErrorParser(resp.Body, &videoInbound[0])
 			if youtubeStatus.StatusCode != http.StatusOK {
-				if youtubeStatus.StatusMessage == "keyInvalid" {  // Quota cannot be deducted from invalid keys.
-					quota -= 7
+				if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
+					quota--
 				}
 				sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return

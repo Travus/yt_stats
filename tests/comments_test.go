@@ -16,7 +16,7 @@ import (
 const videoId = "zqfZs3Z7vy8"
 
 // Required to convert sample data into the state it would otherwise be.
-func fromFileFixer(t *testing.T, f string) []interface{} {
+func fromFileFixerComments(t *testing.T, f string) []interface{} {
 	var inbound []interface{}
 	read, err := os.Open(f)
 	if err != nil {
@@ -71,7 +71,7 @@ func TestCommentsParser(t *testing.T) {
 	var outbound []interface{}
 	var replies []string
 	parseFile(t, "res/commentthreads_inbound.json", &inbound)
-	expected = fromFileFixer(t, "res/commentthreads_outbound.json")
+	expected = fromFileFixerComments(t, "res/commentthreads_outbound.json")
 	yt_stats.CommentsParser(inbound, &outbound, &replies)
 	yt_stats.SortComments(&outbound)
 	if reflect.DeepEqual(outbound, []yt_stats.Comment{}) {
@@ -90,7 +90,7 @@ func TestRepliesParser(t *testing.T) {
 	var expected []interface{}
 	var outbound []interface{}
 	parseFile(t, "res/comments_inbound.json", &inbound)
-	expected = fromFileFixer(t, "res/comments_outbound.json")
+	expected = fromFileFixerComments(t, "res/comments_outbound.json")
 	yt_stats.RepliesParser(inbound, &outbound)
 	yt_stats.SortComments(&outbound)
 	if reflect.DeepEqual(outbound, []yt_stats.Comment{}) {
@@ -105,7 +105,7 @@ func TestCommentSearch(t *testing.T) {
 	var testData []interface{}
 	var results []interface{}
 	var filters []yt_stats.Filter
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_1.json", &filters)
 	worked, results := yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -116,7 +116,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_2.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -127,7 +127,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_3.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -138,7 +138,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_4.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -149,7 +149,7 @@ func TestCommentSearch(t *testing.T) {
 	}
 	results = nil
 	filters = nil
-	testData = fromFileFixer(t, "res/sample_comments.json")
+	testData = fromFileFixerComments(t, "res/sample_comments.json")
 	parseFile(t, "res/searches_5.json", &filters)
 	worked, results = yt_stats.CommentFilter(filters, testData)
 	if !worked {
@@ -162,7 +162,8 @@ func TestCommentSearch(t *testing.T) {
 
 func TestCommentsHandlerSuccess(t *testing.T) {
 	var response yt_stats.CommentOutbound
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=%s&id=%s", getKey(t), videoId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,12 +178,12 @@ func TestCommentsHandlerSuccess(t *testing.T) {
 		t.Fatal("failed decoding response from endpoint")
 	}
 	if response.VideoId != videoId {
-		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s",videoId, response.VideoId)
+		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s", videoId, response.VideoId)
 	}
 	if !(len(response.Comments) >= 48) {
 		t.Errorf("handler returned wrong body: expected more than 48 results, received only %d", len(response.Comments))
 	}
-	if response.QuotaUsage < 5 {
+	if response.QuotaUsage < 1 {
 		t.Error("handler returned low quota usage.")
 	}
 }
@@ -195,8 +196,8 @@ func TestCommentsHandlerSearchSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=%s&id=%s",
-		getKey(t), videoId), bytes.NewReader(body))
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), bytes.NewReader(body))
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,18 +212,19 @@ func TestCommentsHandlerSearchSuccess(t *testing.T) {
 		t.Fatal("failed decoding response from endpoint")
 	}
 	if response.VideoId != videoId {
-		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s",videoId, response.VideoId)
+		t.Errorf("handler returned wrong body: expected videoId %s, received videoId %s", videoId, response.VideoId)
 	}
 	if len(response.Comments) > 20 || len(response.Comments) == 0 {
 		t.Errorf("handler returned wrong body: got wrong number of comments, got %d", len(response.Comments))
 	}
-	if response.QuotaUsage < 5 {
+	if response.QuotaUsage < 1 {
 		t.Error("handler returned low quota usage.")
 	}
 }
 
 func TestCommentsHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=invalid&id=%s", videoId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -240,8 +242,8 @@ func TestCommentsHandlerInvalidKey(t *testing.T) {
 
 func TestCommentsHandlerInvalidSearch(t *testing.T) {
 	body := "invalid"
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=invalid&id=%s", videoId),
-		strings.NewReader(body))
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId), strings.NewReader(body))
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,9 +264,9 @@ func TestCommentsHandlerNoKey(t *testing.T) {
 	keyMissing(t, yt_stats.CommentsHandler, fmt.Sprintf("/ytstats/v1/comments/?id=%s", videoId))
 }
 
-
 func TestCommentsHandlerNoVideo(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/comments/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/comments/", nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -284,4 +286,3 @@ func TestCommentsHandlerNoVideo(t *testing.T) {
 func TestCommentsHandlerUnsupportedType(t *testing.T) {
 	unsupportedRequestType(t, yt_stats.CommentsHandler, "/ytstats/v1/comments/", "PUT")
 }
-

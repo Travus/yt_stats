@@ -4,18 +4,21 @@ import (
 	"time"
 )
 
-// Stores variables sent to the handlers, basically global variables.
+// Inputs stores variables sent to the handlers, basically global variables.
 type Inputs struct {
 	StartTime         time.Time
+	StatusCheck       string
 	RepliesRoot       string
 	CommentsRoot      string
 	ChannelsRoot      string
 	PlaylistsRoot     string
 	PlaylistItemsRoot string
 	VideosRoot        string
+	StreamRoot        string
+	ChatRoot          string
 }
 
-// Represents the JSON received from a YouTube error response.
+// YoutubeErrorInbound represents the JSON received from a YouTube error response.
 type YoutubeErrorInbound struct {
 	Error struct {
 		Code    int    `json:"code"`
@@ -26,14 +29,14 @@ type YoutubeErrorInbound struct {
 	} `json:"error"`
 }
 
-// Represents the JSON sent on errors.
+// StatusCodeOutbound represents the JSON sent on errors.
 type StatusCodeOutbound struct {
 	QuotaUsage    int    `json:"quota_usage"`
 	StatusCode    int    `json:"status_code"`
 	StatusMessage string `json:"status_message"`
 }
 
-// Represents the JSON sent by the Status endpoint.
+// StatusOutbound represents the JSON sent by the Status endpoint.
 type StatusOutbound struct {
 	QuotaUsage    int     `json:"quota_usage"`
 	Version       string  `json:"version"`
@@ -44,7 +47,7 @@ type StatusOutbound struct {
 	} `json:"youtube_status"`
 }
 
-// Represents the JSON received from the YouTube Channels endpoint.
+// ChannelInbound represents the JSON received from the YouTube Channels endpoint.
 type ChannelInbound struct {
 	Items []struct {
 		Id      string `json:"id"`
@@ -72,7 +75,7 @@ type ChannelInbound struct {
 	} `json:"items"`
 }
 
-// Represents the JSON for one channel. Part of ChannelOutbound struct.
+// Channel represets the JSON for one channel. Part of ChannelOutbound struct.
 type Channel struct {
 	Id                    string `json:"id"`
 	Title                 string `json:"title"`
@@ -86,13 +89,13 @@ type Channel struct {
 	VideoCount            int    `json:"video_count"`
 }
 
-// Represents the JSON sent by the Channel endpoint.
+// ChannelOutbound represets the JSON sent by the Channel endpoint.
 type ChannelOutbound struct {
 	QuotaUsage int       `json:"quota_usage"`
 	Channels   []Channel `json:"channels"`
 }
 
-// Represents the JSON received from the YouTube Playlists endpoint.
+// PlaylistInbound represents the JSON received from the YouTube Playlists endpoint.
 type PlaylistInbound struct {
 	Items []struct {
 		Id      string `json:"id"`
@@ -114,7 +117,7 @@ type PlaylistInbound struct {
 	} `json:"items"`
 }
 
-// Represents the JSON received from the YouTube PlaylistsItems endpoint.
+// PlaylistItemsInbound represents the JSON received from the YouTube PlaylistsItems endpoint.
 type PlaylistItemsInbound struct {
 	NextPageToken string `json:"nextPageToken"`
 	Items         []struct {
@@ -126,7 +129,7 @@ type PlaylistItemsInbound struct {
 	} `json:"items"`
 }
 
-// Represents the JSON received from the YouTube Videos endpoint.
+// VideoInbound represents the JSON received from the YouTube Videos endpoint.
 type VideoInbound struct {
 	Items []struct {
 		Id      string `json:"id"`
@@ -147,13 +150,12 @@ type VideoInbound struct {
 		Statistics struct {
 			ViewCount    string `json:"viewCount"`
 			LikeCount    string `json:"likeCount"`
-			DislikeCount string `json:"dislikeCount"`
 			CommentCount string `json:"commentCount"`
 		} `json:"statistics"`
 	} `json:"items"`
 }
 
-// Represents the JSON for stats over a range of videos. Part of Playlist struct.
+// VideoStats represents the JSON for stats over a range of videos. Part of Playlist struct.
 type VideoStats struct {
 	AvailableVideos       int    `json:"available_videos"`
 	TotalLength           int    `json:"total_length"`
@@ -173,11 +175,6 @@ type VideoStats struct {
 	LeastLikedVideo       string `json:"least_liked_video"`
 	LeastLikes            int    `json:"least_likes"`
 	AverageLikes          int    `json:"average_likes"`
-	MostDislikedVideo     string `json:"most_disliked_video"`
-	MostDislikes          int    `json:"most_dislikes"`
-	LeastDislikedVideo    string `json:"least_disliked_video"`
-	LeastDislikes         int    `json:"least_dislikes"`
-	AverageDislikes       int    `json:"average_dislikes"`
 	MostCommentedVideo    string `json:"most_commented_video"`
 	MostComments          int    `json:"most_comments"`
 	LeastCommentedVideo   string `json:"least_commented_video"`
@@ -185,7 +182,7 @@ type VideoStats struct {
 	AverageComments       int    `json:"average_comments"`
 }
 
-// Represents the JSON for one video. Part of Playlist struct.
+// Video represents the JSON for one video. Part of Playlist struct.
 type Video struct {
 	Id           string `json:"id"`
 	Title        string `json:"title"`
@@ -196,11 +193,10 @@ type Video struct {
 	Duration     int    `json:"duration"`
 	ViewCount    int    `json:"view_count"`
 	LikeCount    int    `json:"like_count"`
-	DislikeCount int    `json:"dislike_count"`
 	CommentCount int    `json:"comment_count"`
 }
 
-// Represents the JSON for one playlist. Part of PlaylistOutbound struct.
+// Playlist represents the JSON for one playlist. Part of PlaylistOutbound struct.
 type Playlist struct {
 	Id          string      `json:"id"`
 	Title       string      `json:"title"`
@@ -216,20 +212,20 @@ type Playlist struct {
 	} `json:"channel_info"`
 }
 
-// Represents the JSON sent by the Playlist endpoint.
+// PlaylistOutbound represents the JSON sent by the Playlist endpoint.
 type PlaylistOutbound struct {
 	QuotaUsage int        `json:"quota_usage"`
 	Playlists  []Playlist `json:"playlists"`
 }
 
-// Represents the JSON sent by the Video endpoint.
+// VideoOutbound represents the JSON sent by the Video endpoint.
 type VideoOutbound struct {
 	QuotaUsage int         `json:"quota_usage"`
 	VideoStats *VideoStats `json:"video_stats,omitempty"`
 	Videos     []Video     `json:"videos"`
 }
 
-// Represents the JSON received from the YouTube CommentThreads endpoint.
+// CommentsInbound represents the JSON received from the YouTube CommentThreads endpoint.
 type CommentsInbound struct {
 	NextPageToken string `json:"nextPageToken"`
 	Items         []struct {
@@ -267,7 +263,7 @@ type CommentsInbound struct {
 	} `json:"items"`
 }
 
-// Represents the JSON received from the YouTube Comments endpoint.
+// RepliesInbound represents the JSON received from the YouTube Comments endpoint.
 type RepliesInbound struct {
 	NextPageToken string `json:"nextPageToken"`
 	Items         []struct {
@@ -285,7 +281,7 @@ type RepliesInbound struct {
 	} `json:"items"`
 }
 
-// Represents the JSON for one comment. Part of CommentOutbound.
+// Comment represents the JSON for one comment. Part of CommentOutbound.
 type Comment struct {
 	Type             string `json:"type"`
 	Id               string `json:"id"`
@@ -298,7 +294,7 @@ type Comment struct {
 	ReplyCount       int    `json:"reply_count"`
 }
 
-// Represents the JSON for one reply. Part of CommentOutbound.
+// Reply represents the JSON for one reply. Part of CommentOutbound.
 type Reply struct {
 	Type             string `json:"type"`
 	Id               string `json:"id"`
@@ -311,18 +307,246 @@ type Reply struct {
 	PublishedAt      string `json:"published_at"`
 }
 
-// Represents the JSON sent by the Comment endpoint.
+// CommentOutbound represents the JSON sent by the Comment endpoint.
 type CommentOutbound struct {
 	QuotaUsage int           `json:"quota_usage"`
 	VideoId    string        `json:"video_id"`
 	Comments   []interface{} `json:"comments"`
 }
 
-// Represents the JSON for a filter query.
+// Filter represents the JSON for a filter query.
 type Filter struct {
 	CaseSensitive bool     `json:"case_sensitive"`
 	MatchAny      bool     `json:"match_any"`
 	Reductive     bool     `json:"reductive"`
 	Users         []string `json:"users"`
 	Content       []string `json:"content"`
+}
+
+// StreamInbound represents the JSON received from the YouTube Video endpoint used for Streams endpoint.
+type StreamInbound struct {
+	Items []struct {
+		Id                   string `json:"id"`
+		LiveStreamingDetails struct {
+			ScheduledStartTime string `json:"scheduledStartTime"`
+			ActualStartTime    string `json:"actualStartTime"`
+			ActualEndTime      string `json:"actualEndTime"`
+			ConcurrentViewers  string `json:"concurrentViewers"`
+			ActiveLiveChatId   string `json:"activeLiveChatId"`
+		} `json:"liveStreamingDetails"`
+	} `json:"items"`
+}
+
+// StreamOutbound represents the JSON sent by the Streams endpoint.
+type StreamOutbound struct {
+	QuotaUsage int           `json:"quota_usage"`
+	Streams    []interface{} `json:"streams"`
+}
+
+// LiveStream represents the JSON for one ongoing stream, needs own struct to display non-omitted viewer count.
+type LiveStream struct {
+	Id                 string `json:"id"`
+	Status             string `json:"status"`
+	ScheduledStartTime string `json:"scheduled_start_time,omitempty"`
+	StartTime          string `json:"start_time"`
+	ConcurrentViewers  int    `json:"concurrent_viewers"`
+	ChatId             string `json:"chat_id,omitempty"`
+}
+
+// Stream represents the JSON for one not ongoing stream.
+type Stream struct {
+	Id                 string `json:"id"`
+	Status             string `json:"status"`
+	ScheduledStartTime string `json:"scheduled_start_time,omitempty"`
+	StartTime          string `json:"start_time,omitempty"`
+	EndTime            string `json:"end_time,omitempty"`
+}
+
+// ChatInbound represents the JSON received from the YouTube liveChatMessages endpoint.
+type ChatInbound struct {
+	NextPageToken         string `json:"nextPageToken"`
+	PollingIntervalMillis int    `json:"pollingIntervalMillis"`
+	Items                 []struct {
+		Id      string `json:"id"`
+		Snippet struct {
+			Type                  string `json:"type"`
+			AuthorChannelId       string `json:"authorChannelId"`
+			PublishedAt           string `json:"publishedAt"`
+			DisplayMessage        string `json:"displayMessage"`
+			MessageDeletedDetails struct {
+				DeletedMessageId string `json:"deletedMessageId"`
+			} `json:"messageDeletedDetails"`
+			UserBannedDetails struct {
+				BannedUserDetails struct {
+					ChannelId   string `json:"channelId"`
+					ChannelUrl  string `json:"channelUrl"`
+					DisplayName string `json:"displayName"`
+				} `json:"bannedUserDetails"`
+				BanType            string `json:"banType"`
+				BanDurationSeconds int    `json:"banDurationSeconds"`
+			} `json:"userBannedDetails"`
+			SuperChatDetails struct {
+				AmountMicros string `json:"amountMicros"`
+				Currency     string `json:"currency"`
+				UserComment  string `json:"userComment"`
+			} `json:"superChatDetails"`
+			SuperStickerDetails struct {
+				SuperStickerMetadata struct {
+					StickerId string `json:"stickerId"`
+					AltText   string `json:"altText"`
+				} `json:"superStickerMetadata"`
+				AmountMicros string `json:"amountMicros"`
+				Currency     string `json:"currency"`
+			} `json:"superStickerDetails"`
+			NewSponsorDetails struct {
+				MemberLevelName string `json:"memberLevelName"`
+				IsUpgrade       bool   `json:"isUpgrade"`
+			}
+			MemberMilestoneChatDetails struct {
+				MemberLevelName string `json:"memberLevelName"`
+				MemberMonth     int    `json:"memberMonth"`
+				UserComment     string `json:"userComment"`
+			} `json:"memberMilestoneChatDetails"`
+		} `json:"snippet"`
+		AuthorDetails struct {
+			ChannelId       string `json:"channelId"`
+			ChannelUrl      string `json:"channelUrl"`
+			DisplayName     string `json:"displayName"`
+			IsVerified      bool   `json:"isVerified"`
+			IsChatOwner     bool   `json:"isChatOwner"`
+			IsChatSponsor   bool   `json:"isChatSponsor"`
+			IsChatModerator bool   `json:"isChatModerator"`
+		} `json:"authorDetails"`
+	} `json:"items"`
+}
+
+// ChatOutbound represents the JSON sent by the Chat endpoint.
+type ChatOutbound struct {
+	QuotaUsage        int           `json:"quota_usage"`
+	ChatId            string        `json:"chat_id"`
+	NextPage          string        `json:"next_page"`
+	SuggestedCooldown int           `json:"suggested_cooldown"`
+	ChatEvents        []interface{} `json:"chat_events"`
+}
+
+// ChatUser represents the JSON for a user in chat. Part of chat events.
+type ChatUser struct {
+	UserName       string `json:"user_name"`
+	UserId         string `json:"user_id"`
+	UserChannelUrl string `json:"user_channel_url"`
+	ChatOwner      bool   `json:"chat_owner,omitempty"`
+	Moderator      bool   `json:"moderator,omitempty"`
+	Member         bool   `json:"member,omitempty"`
+	Verified       bool   `json:"verified,omitempty"`
+}
+
+// ChatEnded represents the JSON for the chat ending. Part of ChatOutbound.
+type ChatEnded struct {
+	Id          string `json:"id"`
+	Type        string `json:"type"`
+	PublishedAt string `json:"published_at"`
+}
+
+// ChatMessageDeleted represents the JSON for a chat message being deleted. Part of ChatOutbound.
+type ChatMessageDeleted struct {
+	Id             string   `json:"id"`
+	Type           string   `json:"type"`
+	PublishedAt    string   `json:"published_at"`
+	DeletedMessage string   `json:"deleted_message"`
+	DeletedBy      ChatUser `json:"deleted_by"`
+}
+
+// ChatNewMember represents the JSON for a new member or member level change. Part of ChatOutbound.
+type ChatNewMember struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	Level       string   `json:"level"`
+	Upgrade     bool     `json:"upgrade"`
+	NewMember   ChatUser `json:"new_member"`
+}
+
+// ChatMemberMilestone represents the JSON for a member announcing membership renewal. Part of ChatOutbound.
+type ChatMemberMilestone struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	UserComment string   `json:"user_comment"`
+	Level       string   `json:"level"`
+	Months      int      `json:"months"`
+	Member      ChatUser `json:"member"`
+}
+
+// ChatMemberOnlyModeEnded represents the JSON for a chat stopping member only mode. Part of ChatOutbound.
+type ChatMemberOnlyModeEnded struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	EndedBy     ChatUser `json:"ended_by"`
+}
+
+// ChatMemberOnlyModeStarted represents the JSON for a chat starting member only mode. Part of ChatOutbound.
+type ChatMemberOnlyModeStarted struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	StartedBy   ChatUser `json:"started_by"`
+}
+
+// ChatSuperChat represents the JSON for a super chat. Part of ChatOutbound.
+type ChatSuperChat struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	Amount      float64  `json:"amount"`
+	Currency    string   `json:"currency"`
+	SentBy      ChatUser `json:"sent_by"`
+}
+
+// ChatSuperSticker represents the JSON for a super sticker. Part of ChatOutbound.
+type ChatSuperSticker struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Amount      float64  `json:"amount"`
+	Currency    string   `json:"currency"`
+	StickerId   string   `json:"sticker_id"`
+	AltText     string   `json:"alt_text"`
+	SentBy      ChatUser `json:"sent_by"`
+}
+
+// ChatMessage represents the JSON for chat message. Part of ChatOutbound.
+type ChatMessage struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	Author      ChatUser `json:"author"`
+}
+
+// ChatTombstone represents the JSON for a removed chat message. Part of ChatOutbound.
+type ChatTombstone struct {
+	Id          string `json:"id"`
+	Type        string `json:"type"`
+	PublishedAt string `json:"published_at"`
+}
+
+// ChatUserBanned represents the JSON for a chat user getting banned. Part of ChatOutbound.
+type ChatUserBanned struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	BanType     string   `json:"ban_type"`
+	BanDuration int      `json:"ban_duration,omitempty"`
+	BannedUser  ChatUser `json:"banned_user"`
+	BannedBy    ChatUser `json:"banned_by"`
+}
+
+// ChatUnknownEvent represents the JSON for an unknown chat events the wrapper can't handle. Part of ChatOutbound.
+type ChatUnknownEvent struct {
+	Type  string      `json:"type"`
+	Event interface{} `json:"event"`
 }

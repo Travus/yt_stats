@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    container_name: yt_stats
+    ports:
+      - "80:8080"
+#      - "443:8081"
+#    volumes:
+#      - ./cert-cache:/app/cert-cache
+#    environment:
+#      - tls_address=example.com

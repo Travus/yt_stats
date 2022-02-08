@@ -20,8 +20,8 @@ func getVideoIds(t *testing.T) string {
 
 func TestVideoHandlerSuccess(t *testing.T) {
 	var response yt_stats.VideoOutbound
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?key=%s&id=%s&stats=true",
-		getKey(t), getVideoIds(t)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?id=%s&stats=true", getVideoIds(t)), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,13 +44,14 @@ func TestVideoHandlerSuccess(t *testing.T) {
 	if response.VideoStats == nil {
 		t.Error("handler returned wrong body, got back no stats despite asking for them")
 	}
-	if response.QuotaUsage != 7 {
-		t.Errorf("handler returned wrong quota usage: expected %d actually %d", 7, response.QuotaUsage)
+	if response.QuotaUsage != 1 {
+		t.Errorf("handler returned wrong quota usage: expected 1 actually %d", response.QuotaUsage)
 	}
 }
 
 func TestVideoHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?key=invalid&id=%s", getVideoIds(t)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?id=%s", getVideoIds(t)), nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,8 +72,8 @@ func TestVideoHandlerNoKey(t *testing.T) {
 }
 
 func TestVideoHandlerInvalidFlag(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?key=%s&id=%s&stats=invalid",
-		getKey(t), getVideoIds(t)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/playlist/?id=%s&stats=invalid", getVideoIds(t)), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +90,8 @@ func TestVideoHandlerInvalidFlag(t *testing.T) {
 }
 
 func TestVideoHandlerNoVideo(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/video/", nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,8 +109,8 @@ func TestVideoHandlerNoVideo(t *testing.T) {
 }
 
 func TestVideoHandlerTooManyVideos(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?key=%s&id=%s",
-		getKey(t), strings.Repeat(",", 50)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/video/?id=%s", strings.Repeat(",", 50)), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}

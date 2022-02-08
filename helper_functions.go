@@ -35,3 +35,12 @@ func durationConverter(durStr string) (int, error) {
 	}
 	return int(dur.ToDuration().Seconds()), nil
 }
+
+// Get key from header, or from URl query parameters if not in header. Returns "" if neither is available.
+func getKey(r *http.Request) string {
+	key := r.Header.Get("key")
+	if key == "" {
+		key = r.URL.Query().Get("key")
+	}
+	return key
+}

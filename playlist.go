@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Handler for the playlist endpoint. /ytstats/v1/playlist/
+// PlaylistHandler is the handler for the playlist endpoint. /ytstats/v1/playlist/
 // Provides information on one or more playlists, and optionally a list of video and statistics on them.
 func PlaylistHandler(input Inputs) http.Handler {
 	playlist := func(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +20,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 			// Check user input and fail if input is incorrect or missing.
 			var youtubeStatus StatusCodeOutbound
 			var playlistInbound PlaylistInbound
-			key := r.URL.Query().Get("key")
+			key := getKey(r)
 			if key == "" {
 				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
 				return
@@ -52,11 +52,11 @@ func PlaylistHandler(input Inputs) http.Handler {
 				return
 			}
 			defer resp.Body.Close()
-			quota += 5
+			quota++
 			youtubeStatus = ErrorParser(resp.Body, &playlistInbound)
 			if youtubeStatus.StatusCode != http.StatusOK {
-				if youtubeStatus.StatusMessage == "keyInvalid" {  // Quota cannot be deducted from invalid keys.
-					quota -= 5
+				if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
+					quota--
 				}
 				sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
 				return
@@ -80,7 +80,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 				var playlistItemsInbound []PlaylistItemsInbound
 				for hasNextPage := true; hasNextPage; hasNextPage = pageToken != "" {
 					var playlistItemPageInbound PlaylistItemsInbound
-					ok := func() bool {  // Internal function for deferring the closing of response bodies inside loop.
+					ok := func() bool { // Internal function for deferring the closing of response bodies inside loop.
 						resp, err = http.Get(fmt.Sprintf("%s&playlistId=%s&key=%s&pageToken=%s",
 							input.PlaylistItemsRoot, plOutbound.Playlists[i].Id, key, pageToken))
 						if err != nil {
@@ -88,7 +88,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 							return false
 						}
 						defer resp.Body.Close()
-						quota += 3
+						quota++
 						youtubeStatus = ErrorParser(resp.Body, &playlistItemPageInbound)
 						if youtubeStatus.StatusCode != http.StatusOK {
 							sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)
@@ -116,7 +116,7 @@ func PlaylistHandler(input Inputs) http.Handler {
 							return false
 						}
 						defer resp.Body.Close()
-						quota += 7
+						quota++
 						youtubeStatus = ErrorParser(resp.Body, &videoInboundPage)
 						if youtubeStatus.StatusCode != http.StatusOK {
 							sendStatusCode(w, quota, youtubeStatus.StatusCode, youtubeStatus.StatusMessage)

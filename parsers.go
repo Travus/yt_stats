@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// Parses a youtube response into a given struct, and returns a status code struct with OK or response.
+// ErrorParser parses a youtube response into a given struct, and returns a status code struct with OK or response.
 func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 	var buf bytes.Buffer
 	tee := io.TeeReader(r, &buf)
@@ -23,6 +23,18 @@ func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 		}
 	}
 	if errorCode.Error.Code != 0 {
+		if strings.Contains(errorCode.Error.Message, "missing a valid API key") {
+			return StatusCodeOutbound{
+				StatusCode:    errorCode.Error.Code,
+				StatusMessage: "keyMissing",
+			}
+		}
+		if strings.Contains(errorCode.Error.Message, "API key not valid.") {
+			return StatusCodeOutbound{
+				StatusCode:    errorCode.Error.Code,
+				StatusMessage: "keyInvalid",
+			}
+		}
 		if errorCode.Error.Errors[0].Reason == "" {
 			return StatusCodeOutbound{
 				StatusCode:    errorCode.Error.Code,
@@ -49,7 +61,7 @@ func ErrorParser(r io.Reader, s interface{}) StatusCodeOutbound {
 	}
 }
 
-// Parses a ChannelInbound struct to a ChannelOutbound struct.
+// ChannelParser parses a ChannelInbound struct to a ChannelOutbound struct.
 func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 	var outbound ChannelOutbound
 	outbound.Channels = make([]Channel, len(inbound.Items))
@@ -85,7 +97,7 @@ func ChannelParser(inbound ChannelInbound) ChannelOutbound {
 	return outbound
 }
 
-// Parses a PlaylistInbound struct to a PlaylistOutbound struct.
+// PlaylistTopLevelParser parses a PlaylistInbound struct to a PlaylistOutbound struct.
 func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 	var outbound PlaylistOutbound
 	outbound.Playlists = make([]Playlist, len(inbound.Items))
@@ -102,7 +114,7 @@ func PlaylistTopLevelParser(inbound PlaylistInbound) PlaylistOutbound {
 	return outbound
 }
 
-// Parses a slice of PlaylistItemInbound structs to a slice of string slices including all the video IDs.
+// PlaylistItemsParser parses a slice of PlaylistItemInbound structs to a slice of string slices including all the video IDs.
 func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
 	var outbound [][]string
 	for _, inboundPlItems := range inbound {
@@ -115,10 +127,10 @@ func PlaylistItemsParser(inbound []PlaylistItemsInbound) [][]string {
 	return outbound
 }
 
-// Parses a slice of VideoInbound structs into a Playlist struct and returns any errors.
+// VideoParser parses a slice of VideoInbound structs into a Playlist struct and returns any errors.
 func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, videos bool) error {
 	var vStats VideoStats
-	totalViews, totalLikes, totalDislikes, totalComments := 0, 0, 0, 0
+	totalViews, totalLikes, totalComments := 0, 0, 0
 	for _, videoInbound := range inbound {
 
 		// Handle overall statistics, like total duration etc.
@@ -137,11 +149,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 				return err
 			}
 			totalLikes += likes
-			dislikes, err := strconv.Atoi(video.Statistics.DislikeCount)
-			if err != nil {
-				return err
-			}
-			totalDislikes += dislikes
 			comments, err := strconv.Atoi(video.Statistics.CommentCount)
 			if err != nil {
 				return err
@@ -160,7 +167,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 					Duration:     dur,
 					ViewCount:    views,
 					LikeCount:    likes,
-					DislikeCount: dislikes,
 					CommentCount: comments,
 				}
 				playlistObject.Videos = append(playlistObject.Videos, vid)
@@ -195,14 +201,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 					vStats.LeastLikedVideo = video.Id
 					vStats.LeastLikes = likes
 				}
-				if dislikes > vStats.MostDislikes || vStats.MostDislikedVideo == "" {
-					vStats.MostDislikedVideo = video.Id
-					vStats.MostDislikes = dislikes
-				}
-				if dislikes < vStats.LeastDislikes || vStats.LeastDislikedVideo == "" {
-					vStats.LeastDislikedVideo = video.Id
-					vStats.LeastDislikes = dislikes
-				}
 				if comments > vStats.MostComments || vStats.MostCommentedVideo == "" {
 					vStats.MostCommentedVideo = video.Id
 					vStats.MostComments = comments
@@ -220,7 +218,6 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 		vStats.AverageVideoDuration = vStats.TotalLength / vStats.AvailableVideos
 		vStats.AverageViews = vStats.TotalViews / vStats.AvailableVideos
 		vStats.AverageLikes = totalLikes / vStats.AvailableVideos
-		vStats.AverageDislikes = totalDislikes / vStats.AvailableVideos
 		vStats.AverageComments = totalComments / vStats.AvailableVideos
 		playlistObject.VideoStats = &vStats
 	} else {
@@ -229,7 +226,7 @@ func VideoParser(inbound []VideoInbound, playlistObject *Playlist, stats bool, v
 	return nil
 }
 
-// Parses a CommentsInbound struct into a slice of interfaces containing Comment and Reply structs.
+// CommentsParser parses a CommentsInbound struct into a slice of interfaces containing Comment and Reply structs.
 func CommentsParser(inbound CommentsInbound, comments *[]interface{}, replies *[]string) {
 	for _, item := range inbound.Items {
 		com := Comment{
@@ -265,7 +262,7 @@ func CommentsParser(inbound CommentsInbound, comments *[]interface{}, replies *[
 	}
 }
 
-// Parses a RepliesInbound struct into a slice of interfaces containing Comment and Reply structs.
+// RepliesParser parses a RepliesInbound struct into a slice of interfaces containing Comment and Reply structs.
 func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
 	for _, item := range inbound.Items {
 		rep := Reply{
@@ -281,4 +278,242 @@ func RepliesParser(inbound RepliesInbound, comments *[]interface{}) {
 		}
 		*comments = append(*comments, rep)
 	}
+}
+
+// StreamParser parses a StreamInbound struct into a StreamOutbound struct.
+func StreamParser(inbound StreamInbound) StreamOutbound {
+	var outbound StreamOutbound
+	outbound.Streams = make([]interface{}, len(inbound.Items))
+	for i, video := range inbound.Items {
+		if video.LiveStreamingDetails.ActualStartTime != "" && video.LiveStreamingDetails.ActualEndTime == "" {
+			viewers, err := strconv.Atoi(video.LiveStreamingDetails.ConcurrentViewers)
+			if err != nil {
+				viewers = -1
+				log.Printf("failed to convert concurrent viewers for %s", video.Id)
+			}
+			outbound.Streams[i] = LiveStream{
+				Id:                 video.Id,
+				Status:             "live",
+				ScheduledStartTime: video.LiveStreamingDetails.ScheduledStartTime,
+				StartTime:          video.LiveStreamingDetails.ActualStartTime,
+				ConcurrentViewers:  viewers,
+				ChatId:             video.LiveStreamingDetails.ActiveLiveChatId,
+			}
+		} else if video.LiveStreamingDetails.ActualEndTime != "" {
+			outbound.Streams[i] = Stream{
+				Id:                 video.Id,
+				Status:             "ended",
+				ScheduledStartTime: video.LiveStreamingDetails.ScheduledStartTime,
+				StartTime:          video.LiveStreamingDetails.ActualStartTime,
+				EndTime:            video.LiveStreamingDetails.ActualEndTime,
+			}
+		} else if video.LiveStreamingDetails.ScheduledStartTime != "" {
+			outbound.Streams[i] = Stream{
+				Id:                 video.Id,
+				Status:             "scheduled",
+				ScheduledStartTime: video.LiveStreamingDetails.ScheduledStartTime,
+			}
+		} else {
+			outbound.Streams[i] = Stream{
+				Id:     video.Id,
+				Status: "video",
+			}
+		}
+	}
+	return outbound
+}
+
+// ChatParser parses a ChatInbound struct into a ChatOutbound struct.
+func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
+	var outbound ChatOutbound
+	outbound.ChatId = chatId
+	outbound.NextPage = inbound.NextPageToken
+	outbound.SuggestedCooldown = inbound.PollingIntervalMillis
+	outbound.ChatEvents = make([]interface{}, len(inbound.Items))
+	for i, event := range inbound.Items {
+		switch event.Snippet.Type {
+		case "chatEndedEvent":
+			outbound.ChatEvents[i] = ChatEnded{
+				Id:          event.Id,
+				Type:        "chat_ended",
+				PublishedAt: event.Snippet.PublishedAt,
+			}
+		case "messageDeletedEvent":
+			outbound.ChatEvents[i] = ChatMessageDeleted{
+				Id:             event.Id,
+				Type:           "message_deleted",
+				PublishedAt:    event.Snippet.PublishedAt,
+				DeletedMessage: event.Snippet.MessageDeletedDetails.DeletedMessageId,
+				DeletedBy: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		case "newSponsorEvent":
+			outbound.ChatEvents[i] = ChatNewMember{
+				Id:          event.Id,
+				Type:        "new_member",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.DisplayMessage,
+				Level:       event.Snippet.NewSponsorDetails.MemberLevelName,
+				Upgrade:     event.Snippet.NewSponsorDetails.IsUpgrade,
+				NewMember: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		case "memberMilestoneChatEvent":
+			outbound.ChatEvents[i] = ChatMemberMilestone{
+				Id:          event.Id,
+				Type:        "membership_milestone",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.DisplayMessage,
+				UserComment: event.Snippet.MemberMilestoneChatDetails.UserComment,
+				Level:       event.Snippet.MemberMilestoneChatDetails.MemberLevelName,
+				Months:      event.Snippet.MemberMilestoneChatDetails.MemberMonth,
+				Member: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		case "sponsorOnlyModeEndedEvent":
+			outbound.ChatEvents[i] = ChatMemberOnlyModeEnded{
+				Id:          event.Id,
+				Type:        "member_only_off",
+				PublishedAt: event.Snippet.PublishedAt,
+				EndedBy: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		case "sponsorOnlyModeStartedEvent":
+			outbound.ChatEvents[i] = ChatMemberOnlyModeStarted{
+				Id:          event.Id,
+				Type:        "member_only_on",
+				PublishedAt: event.Snippet.PublishedAt,
+				StartedBy: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		case "superChatEvent":
+			amountMicros, err := strconv.ParseFloat(event.Snippet.SuperChatDetails.AmountMicros, 64)
+			if err == nil {
+				outbound.ChatEvents[i] = ChatSuperChat{
+					Id:          event.Id,
+					Type:        "superchat",
+					PublishedAt: event.Snippet.PublishedAt,
+					Message:     event.Snippet.SuperChatDetails.UserComment,
+					Amount:      amountMicros / 1000000,
+					Currency:    event.Snippet.SuperChatDetails.Currency,
+					SentBy: ChatUser{
+						UserName:       event.AuthorDetails.DisplayName,
+						UserId:         event.AuthorDetails.ChannelId,
+						UserChannelUrl: event.AuthorDetails.ChannelUrl,
+						ChatOwner:      event.AuthorDetails.IsChatOwner,
+						Moderator:      event.AuthorDetails.IsChatModerator,
+						Member:         event.AuthorDetails.IsChatSponsor,
+						Verified:       event.AuthorDetails.IsVerified,
+					},
+				}
+			}
+		case "superStickerEvent":
+			amountMicros, err := strconv.ParseFloat(event.Snippet.SuperChatDetails.AmountMicros, 64)
+			if err == nil {
+				outbound.ChatEvents[i] = ChatSuperSticker{
+					Id:          event.Id,
+					Type:        "supersticker",
+					PublishedAt: event.Snippet.PublishedAt,
+					Amount:      amountMicros / 1000000,
+					Currency:    event.Snippet.SuperStickerDetails.Currency,
+					StickerId:   event.Snippet.SuperStickerDetails.SuperStickerMetadata.StickerId,
+					AltText:     event.Snippet.SuperStickerDetails.SuperStickerMetadata.AltText,
+					SentBy: ChatUser{
+						UserName:       event.AuthorDetails.DisplayName,
+						UserId:         event.AuthorDetails.ChannelId,
+						UserChannelUrl: event.AuthorDetails.ChannelUrl,
+						ChatOwner:      event.AuthorDetails.IsChatOwner,
+						Moderator:      event.AuthorDetails.IsChatModerator,
+						Member:         event.AuthorDetails.IsChatSponsor,
+						Verified:       event.AuthorDetails.IsVerified,
+					},
+				}
+			}
+		case "textMessageEvent":
+			outbound.ChatEvents[i] = ChatMessage{
+				Id:          event.Id,
+				Type:        "message",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.DisplayMessage,
+				Author: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		case "tombstone":
+			outbound.ChatEvents[i] = ChatTombstone{
+				Id:          event.Id,
+				Type:        "tombstone",
+				PublishedAt: event.Snippet.PublishedAt,
+			}
+		case "userBannedEvent":
+			outbound.ChatEvents[i] = ChatUserBanned{
+				Id:          event.Id,
+				Type:        "ban",
+				PublishedAt: event.Snippet.PublishedAt,
+				BanType:     event.Snippet.UserBannedDetails.BanType,
+				BanDuration: event.Snippet.UserBannedDetails.BanDurationSeconds,
+				BannedUser: ChatUser{
+					UserName:       event.Snippet.UserBannedDetails.BannedUserDetails.DisplayName,
+					UserId:         event.Snippet.UserBannedDetails.BannedUserDetails.ChannelId,
+					UserChannelUrl: event.Snippet.UserBannedDetails.BannedUserDetails.ChannelUrl,
+				},
+				BannedBy: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		default:
+			outbound.ChatEvents[i] = ChatUnknownEvent{
+				Type:  "unknown",
+				Event: event,
+			}
+		}
+	}
+	return outbound
 }

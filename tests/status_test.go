@@ -11,10 +11,11 @@ import (
 )
 
 func TestStatusHandlerValidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/status/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/status/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.Header.Set("key", getTestKey(t))
 	rr := httptest.NewRecorder()
 	handler := yt_stats.StatusHandler(getInputs())
 	time.Sleep(2 * time.Second)
@@ -30,7 +31,8 @@ func TestStatusHandlerValidKey(t *testing.T) {
 }
 
 func TestStatusHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", "/ytstats/v1/status/?key=invalid", nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/status/", nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}

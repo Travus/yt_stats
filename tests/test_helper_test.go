@@ -14,7 +14,7 @@ import (
 )
 
 // Retrieves a valid API token from a 'token' file to run tests with.
-func getKey(t *testing.T) string {
+func getTestKey(t *testing.T) string {
 	resp, err := ioutil.ReadFile("yt_token")
 	if err != nil {
 		t.Fatal(err)
@@ -42,12 +42,15 @@ func parseFile(t *testing.T, f string, s interface{}) {
 func getInputs() yt_stats.Inputs {
 	return yt_stats.Inputs{
 		StartTime:         time.Now(),
+		StatusCheck:       "https://www.googleapis.com/youtube/v3/channels?part=id&id=UCBR8-60-B28hp2BmDPdntcQ",
 		RepliesRoot:       "https://www.googleapis.com/youtube/v3/comments?part=snippet&maxResults=100&textFormat=plainText",
 		CommentsRoot:      "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet,replies&maxResults=100&textFormat=plainText",
 		ChannelsRoot:      "https://www.googleapis.com/youtube/v3/channels?part=id,snippet,contentDetails,statistics&maxResults=50",
 		PlaylistsRoot:     "https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&maxResults=50",
 		PlaylistItemsRoot: "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50",
 		VideosRoot:        "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&maxResults=50",
+		StreamRoot:        "https://www.googleapis.com/youtube/v3/videos?part=id,liveStreamingDetails&maxResults=50",
+		ChatRoot:          "https://www.googleapis.com/youtube/v3/liveChat/messages?part=id,snippet,authorDetails&maxResults=2000",
 	}
 }
 

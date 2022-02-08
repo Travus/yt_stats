@@ -29,8 +29,8 @@ func TestChannelParser(t *testing.T) {
 
 func TestChannelHandlerSuccess(t *testing.T) {
 	var response yt_stats.ChannelOutbound
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=%s&id=%s",
-		getKey(t), ChannelId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?id=%s", ChannelId), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,14 +47,14 @@ func TestChannelHandlerSuccess(t *testing.T) {
 	if response.Channels[0].Id != ChannelId {
 		t.Error("handler returned wrong body, got back wrong channel id.")
 	}
-	if response.QuotaUsage != 7 {
-		t.Errorf("handler returned wrong quota usage: expected %d actually %d", 7, response.QuotaUsage)
+	if response.QuotaUsage != 1 {
+		t.Errorf("handler returned wrong quota usage: expected 1 actually %d", response.QuotaUsage)
 	}
 }
 
 func TestChannelHandlerInvalidKey(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=invalid&id=%s",
-		ChannelId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?id=%s", ChannelId), nil)
+	req.Header.Set("key", "invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,8 @@ func TestChannelHandlerNoKey(t *testing.T) {
 }
 
 func TestChannelHandlerNoChannel(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=%s", getKey(t)), nil)
+	req, err := http.NewRequest("GET", "/ytstats/v1/channel/", nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,8 +94,8 @@ func TestChannelHandlerNoChannel(t *testing.T) {
 }
 
 func TestChannelHandlerTooManyChannels(t *testing.T) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?key=%s&id=%s",
-		getKey(t), strings.Repeat(",", 50)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/ytstats/v1/channel/?id=%s", strings.Repeat(",", 50)), nil)
+	req.Header.Set("key", getTestKey(t))
 	if err != nil {
 		t.Fatal(err)
 	}

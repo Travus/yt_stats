@@ -9,17 +9,17 @@ import (
 	"strings"
 )
 
-// ChannelHandler is the handler for the channel endpoint. /ytstats/v1/channel/
-// Provides statistics for up to 50 channels.
-func ChannelHandler(input Inputs) http.Handler {
-	channel := func(w http.ResponseWriter, r *http.Request) {
+// StreamHandler is the handler for the stream endpoint. /ytstats/v1/stream/
+// Provides status and information on live streams such as start time, and if currently online concurrent viewers.
+func StreamHandler(input Inputs) http.Handler {
+	stats := func(w http.ResponseWriter, r *http.Request) {
 		quota := 0
 		switch r.Method {
 		case http.MethodGet:
 
 			// Check user input and fail if input is incorrect or missing.
 			var youtubeStatus StatusCodeOutbound
-			var channelInbound ChannelInbound
+			var streamInbound StreamInbound
 			key := getKey(r)
 			if key == "" {
 				sendStatusCode(w, quota, http.StatusBadRequest, "keyMissing")
@@ -27,7 +27,7 @@ func ChannelHandler(input Inputs) http.Handler {
 			}
 			ids := r.URL.Query().Get("id")
 			if ids == "" {
-				sendStatusCode(w, quota, http.StatusBadRequest, "channelIdMissing")
+				sendStatusCode(w, quota, http.StatusBadRequest, "streamIdMissing")
 				return
 			}
 			if len(strings.Split(ids, ",")) > 50 {
@@ -36,14 +36,14 @@ func ChannelHandler(input Inputs) http.Handler {
 			}
 
 			// Query youtube and check response for errors.
-			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s", input.ChannelsRoot, url.QueryEscape(ids), key))
+			resp, err := http.Get(fmt.Sprintf("%s&id=%s&key=%s", input.StreamRoot, url.QueryEscape(ids), key))
 			if err != nil {
 				sendStatusCode(w, quota, http.StatusInternalServerError, "failedToQueryYouTubeAPI")
 				return
 			}
 			defer resp.Body.Close()
 			quota++
-			youtubeStatus = ErrorParser(resp.Body, &channelInbound)
+			youtubeStatus = ErrorParser(resp.Body, &streamInbound)
 			if youtubeStatus.StatusCode != http.StatusOK {
 				if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
 					quota--
@@ -53,12 +53,12 @@ func ChannelHandler(input Inputs) http.Handler {
 			}
 
 			// Process and provide response.
-			channelOutbound := ChannelParser(channelInbound)
-			channelOutbound.QuotaUsage = quota
+			streamOutbound := StreamParser(streamInbound)
+			streamOutbound.QuotaUsage = quota
 			w.Header().Set("Content-Type", "application/json")
-			err = json.NewEncoder(w).Encode(channelOutbound)
+			err = json.NewEncoder(w).Encode(streamOutbound)
 			if err != nil {
-				log.Println("Failed to respond to channel endpoint.")
+				log.Println("Failed to respond to stream endpoint.")
 			}
 			return
 		default:
@@ -66,5 +66,5 @@ func ChannelHandler(input Inputs) http.Handler {
 			return
 		}
 	}
-	return http.HandlerFunc(channel)
+	return http.HandlerFunc(stats)
 }
