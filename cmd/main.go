@@ -12,15 +12,17 @@ import (
 
 // Handler for api root endpoint. /ytstats/v1/
 // Provides basic info about the API's purpose.
-func defaultHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		http.ServeFile(w, r, "html/ytstats.v1.html")
-		break
-	default:
-		http.Error(w, "Request type not supported.", http.StatusNotImplemented)
-	}
+func defaultHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			http.ServeFile(w, r, "html/ytstats.v1.html")
+			break
+		default:
+			http.Error(w, "Request type not supported.", http.StatusNotImplemented)
+		}
+	})
 }
 
 func runInProduction(mux *http.ServeMux) {
@@ -54,9 +56,18 @@ func runInDev(mux *http.ServeMux) {
 	log.Fatal(server.ListenAndServe())
 }
 
+func logIncoming(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s -> %s", r.Method, r.RemoteAddr, r.URL.Path)
+		handler.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 
 	// Set global values.
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)
 	inputs := yt_stats.Inputs{
 		StartTime:         time.Now(),
 		StatusCheck:       "https://www.googleapis.com/youtube/v3/channels?part=id&id=UCBR8-60-B28hp2BmDPdntcQ",
@@ -72,18 +83,20 @@ func main() {
 
 	// Setup handlers.
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ytstats/v1/", defaultHandler)
-	mux.Handle("/ytstats/v1/status/", yt_stats.StatusHandler(inputs))
-	mux.Handle("/ytstats/v1/channel/", yt_stats.ChannelHandler(inputs))
-	mux.Handle("/ytstats/v1/playlist/", yt_stats.PlaylistHandler(inputs))
-	mux.Handle("/ytstats/v1/video/", yt_stats.VideoHandler(inputs))
-	mux.Handle("/ytstats/v1/comments/", yt_stats.CommentsHandler(inputs))
-	mux.Handle("/ytstats/v1/stream/", yt_stats.StreamHandler(inputs))
-	mux.Handle("/ytstats/v1/chat/", yt_stats.ChatHandler(inputs))
+	mux.Handle("/ytstats/v1/", logIncoming(defaultHandler()))
+	mux.Handle("/ytstats/v1/status/", logIncoming(yt_stats.StatusHandler(inputs)))
+	mux.Handle("/ytstats/v1/channel/", logIncoming(yt_stats.ChannelHandler(inputs)))
+	mux.Handle("/ytstats/v1/playlist/", logIncoming(yt_stats.PlaylistHandler(inputs)))
+	mux.Handle("/ytstats/v1/video/", logIncoming(yt_stats.VideoHandler(inputs)))
+	mux.Handle("/ytstats/v1/comments/", logIncoming(yt_stats.CommentsHandler(inputs)))
+	mux.Handle("/ytstats/v1/stream/", logIncoming(yt_stats.StreamHandler(inputs)))
+	mux.Handle("/ytstats/v1/chat/", logIncoming(yt_stats.ChatHandler(inputs)))
 
 	if os.Getenv("tls_address") != "" {
+		log.Print("Running in production mode...")
 		runInProduction(mux)
 	} else {
+		log.Print("Running in development mode...")
 		runInDev(mux)
 	}
 }
