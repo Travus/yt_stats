@@ -11,4 +11,5 @@ require (
 	github.com/stretchr/testify v1.4.0 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/text v0.3.6 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect; (Security issue in 2.2.8)
 )

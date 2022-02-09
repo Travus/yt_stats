@@ -17,6 +17,10 @@ import (
 func getTestKey(t *testing.T) string {
 	resp, err := ioutil.ReadFile("yt_token")
 	if err != nil {
+		envToken := os.Getenv("TOKEN")
+		if envToken != "" {
+			return envToken
+		}
 		t.Fatal(err)
 	}
 	return string(resp)

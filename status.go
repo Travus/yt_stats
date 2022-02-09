@@ -33,6 +33,9 @@ func StatusHandler(input Inputs) http.Handler {
 			if youtubeStatus.StatusMessage == "keyInvalid" { // Quota cannot be deducted from invalid keys.
 				quota--
 			}
+			if youtubeStatus.StatusMessage == "keyMissing" { // Endpoint available without key. No key, no quota.
+				quota--
+			}
 
 			// Create and provide response.
 			youtubeStatus.QuotaUsage = quota
@@ -45,7 +48,7 @@ func StatusHandler(input Inputs) http.Handler {
 					StatusMessage string `json:"status_message"`
 				}{StatusCode: youtubeStatus.StatusCode, StatusMessage: youtubeStatus.StatusMessage},
 			}
-			w.WriteHeader(response.YoutubeStatus.StatusCode)
+			w.WriteHeader(http.StatusOK)
 			err = json.NewEncoder(w).Encode(response)
 			if err != nil {
 				log.Println("Failed to respond to status endpoint.")
