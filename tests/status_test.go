@@ -40,8 +40,8 @@ func TestStatusHandlerInvalidKey(t *testing.T) {
 	handler := yt_stats.StatusHandler(getInputs())
 	time.Sleep(1 * time.Second)
 	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusBadRequest, status)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: expected %v actually %v", http.StatusOK, status)
 	}
 	expected := `{"quota_usage":0,"version":"v1","uptime":1,"youtube_status":` +
 		fmt.Sprintf(`{"status_code":%d,"status_message":"keyInvalid"}}`, http.StatusBadRequest)
