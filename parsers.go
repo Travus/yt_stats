@@ -338,6 +338,43 @@ func ChatParser(inbound ChatInbound, chatId string) ChatOutbound {
 				Type:        "chat_ended",
 				PublishedAt: event.Snippet.PublishedAt,
 			}
+		case "giftMembershipReceivedEvent":
+			outbound.ChatEvents[i] = ChatMembershipGiftReceived{
+				Id:            event.Id,
+				Type:          "gift_membership_received",
+				PublishedAt:   event.Snippet.PublishedAt,
+				Message:       event.Snippet.DisplayMessage,
+				Level:         event.Snippet.GiftMembershipReceivedDetails.MemberLevelName,
+				GiftedById:    event.Snippet.GiftMembershipReceivedDetails.GifterChannelId,
+				GiftMessageID: event.Snippet.GiftMembershipReceivedDetails.AssociatedMembershipGiftingMessageId,
+				Recipient: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
+		case "membershipGiftingEvent":
+			outbound.ChatEvents[i] = ChatMembershipGifting{
+				Id:          event.Id,
+				Type:        "memberships_gifted",
+				PublishedAt: event.Snippet.PublishedAt,
+				Message:     event.Snippet.DisplayMessage,
+				Level:       event.Snippet.MembershipGiftingDetails.GiftMembershipsLevelName,
+				Count:       event.Snippet.MembershipGiftingDetails.GiftMembershipsCount,
+				GiftedBy: ChatUser{
+					UserName:       event.AuthorDetails.DisplayName,
+					UserId:         event.AuthorDetails.ChannelId,
+					UserChannelUrl: event.AuthorDetails.ChannelUrl,
+					ChatOwner:      event.AuthorDetails.IsChatOwner,
+					Moderator:      event.AuthorDetails.IsChatModerator,
+					Member:         event.AuthorDetails.IsChatSponsor,
+					Verified:       event.AuthorDetails.IsVerified,
+				},
+			}
 		case "messageDeletedEvent":
 			outbound.ChatEvents[i] = ChatMessageDeleted{
 				Id:             event.Id,

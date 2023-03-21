@@ -401,7 +401,16 @@ type ChatInbound struct {
 			NewSponsorDetails struct {
 				MemberLevelName string `json:"memberLevelName"`
 				IsUpgrade       bool   `json:"isUpgrade"`
-			}
+			} `json:"newSponsorDetails"`
+			MembershipGiftingDetails struct {
+				GiftMembershipsCount     int    `json:"giftMembershipsCount"`
+				GiftMembershipsLevelName string `json:"giftMembershipsLevelName"`
+			} `json:"membershipGiftingDetails"`
+			GiftMembershipReceivedDetails struct {
+				MemberLevelName                      string `json:"memberLevelName"`
+				GifterChannelId                      string `json:"gifterChannelId"`
+				AssociatedMembershipGiftingMessageId string `json:"associatedMembershipGiftingMessageId"`
+			} `json:"giftMembershipReceivedDetails"`
 			MemberMilestoneChatDetails struct {
 				MemberLevelName string `json:"memberLevelName"`
 				MemberMonth     int    `json:"memberMonth"`
@@ -465,6 +474,29 @@ type ChatNewMember struct {
 	Level       string   `json:"level"`
 	Upgrade     bool     `json:"upgrade"`
 	NewMember   ChatUser `json:"new_member"`
+}
+
+// ChatMembershipGifting represents the JSON for a user buying gift memberships on the channel. Part of ChatOutbound.
+type ChatMembershipGifting struct {
+	Id          string   `json:"id"`
+	Type        string   `json:"type"`
+	PublishedAt string   `json:"published_at"`
+	Message     string   `json:"message"`
+	Level       string   `json:"level"`
+	Count       int      `json:"count"`
+	GiftedBy    ChatUser `json:"gifted_by"`
+}
+
+// ChatMembershipGiftReceived represents the JSON for a user receiving a gift membership. Part of ChatOutbound.
+type ChatMembershipGiftReceived struct {
+	Id            string   `json:"id"`
+	Type          string   `json:"type"`
+	PublishedAt   string   `json:"published_at"`
+	Message       string   `json:"message"`
+	Level         string   `json:"level"`
+	GiftedById    string   `json:"gifted_by_id"`
+	GiftMessageID string   `json:"gift_message_id"`
+	Recipient     ChatUser `json:"recipient"`
 }
 
 // ChatMemberMilestone represents the JSON for a member announcing membership renewal. Part of ChatOutbound.

@@ -120,6 +120,49 @@ func fromFileFixerChat(t *testing.T, f string) yt_stats.ChatOutbound {
 						}
 					}
 					outbound.ChatEvents[i] = event
+				} else if entry["type"] == "memberships_gifted" {
+					event := yt_stats.ChatMembershipGifting{
+						Id:          entry["id"].(string),
+						Type:        "memberships_gifted",
+						PublishedAt: entry["published_at"].(string),
+						Message:     entry["message"].(string),
+						Level:       entry["level"].(string),
+						Count:       int(entry["count"].(float64)),
+					}
+					if author, authorOk := entry["gifted_by"].(map[string]interface{}); authorOk {
+						event.GiftedBy = yt_stats.ChatUser{
+							UserName:       author["user_name"].(string),
+							UserId:         author["user_id"].(string),
+							UserChannelUrl: author["user_channel_url"].(string),
+							ChatOwner:      author["chat_owner"].(bool),
+							Moderator:      author["moderator"].(bool),
+							Member:         author["member"].(bool),
+							Verified:       author["verified"].(bool),
+						}
+					}
+					outbound.ChatEvents[i] = event
+				} else if entry["type"] == "gift_membership_received" {
+					event := yt_stats.ChatMembershipGiftReceived{
+						Id:            entry["id"].(string),
+						Type:          "gift_membership_received",
+						PublishedAt:   entry["published_at"].(string),
+						Message:       entry["message"].(string),
+						Level:         entry["level"].(string),
+						GiftedById:    entry["gifted_by_id"].(string),
+						GiftMessageID: entry["gift_message_id"].(string),
+					}
+					if author, authorOk := entry["recipient"].(map[string]interface{}); authorOk {
+						event.Recipient = yt_stats.ChatUser{
+							UserName:       author["user_name"].(string),
+							UserId:         author["user_id"].(string),
+							UserChannelUrl: author["user_channel_url"].(string),
+							ChatOwner:      author["chat_owner"].(bool),
+							Moderator:      author["moderator"].(bool),
+							Member:         author["member"].(bool),
+							Verified:       author["verified"].(bool),
+						}
+					}
+					outbound.ChatEvents[i] = event
 				} else {
 					outbound.ChatEvents[i] = nil
 				}
